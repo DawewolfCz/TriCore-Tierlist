@@ -537,19 +537,23 @@
         let categoriesData = { overall: [] };
         let currentCategory = 'overall';
 
-        // Funkce pro načtení dat z bota (players.json)
+        // Funkce pro načtení dat z MongoDB přes naše API
         async function loadDataFromBot() {
             try {
-                const response = await fetch('players.json');
+                const response = await fetch('/api/players');
+                if (!response.ok) {
+                    throw new Error('Chyba při komunikaci se serverem');
+                }
                 const playersArray = await response.json();
                 
                 // Uloží data do sekce overall
                 categoriesData.overall = playersArray;
                 
-                // Vykreslí tabulku s aktuálními daty
+                // Vykreslí tabulku s aktuálními daty z databáze
                 renderTable(currentCategory, document.getElementById('searchInput').value);
             } catch (error) {
-                console.error("Nepodařilo se načíst soubor players.json (zkus spustit lokální server nebo zkontrolovat bota):", error);
+                console.error("Nepodařilo se načíst hráče z databáze:", error);
+                document.getElementById('tableBody').innerHTML = '<div style="padding: 20px; text-align: center; color: #ff5252;">Nepodařilo se načíst data z databáze.</div>';
             }
         }
 

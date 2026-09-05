@@ -261,13 +261,6 @@
             width: 35px;
         }
 
-        .tier-icon-img {
-            width: 18px;
-            height: 18px;
-            margin-bottom: 4px;
-            filter: brightness(1.1);
-        }
-
         .tier-badge {
             font-size: 0.75rem;
             font-weight: 800;
@@ -472,7 +465,7 @@
         <input type="text" id="searchInput" class="search-input" placeholder="Search player...">
     </div>
 
-    <!-- Navigační lišta upravena na tvých 8 custom kitů -->
+    <!-- Navigační lišta kitů -->
     <div class="nav-bar" id="navBar">
         <div class="nav-item active" data-category="overall">Overall</div>
         <div class="nav-item" data-category="neth axe">Neth Axe</div>
@@ -522,7 +515,6 @@
     </div>
 
     <script>
-        // Seznam tvých 8 kitů
         const allKits = [
             'neth axe',
             'explosive diarrhea',
@@ -537,7 +529,7 @@
         let categoriesData = { overall: [] };
         let currentCategory = 'overall';
 
-        // Funkce pro načtení dat z MongoDB přes naše API
+        // Načtení dat přímo z našeho serveru (MongoDB přes Express API)
         async function loadDataFromBot() {
             try {
                 const response = await fetch('/api/players');
@@ -546,10 +538,7 @@
                 }
                 const playersArray = await response.json();
                 
-                // Uloží data do sekce overall
                 categoriesData.overall = playersArray;
-                
-                // Vykreslí tabulku s aktuálními daty z databáze
                 renderTable(currentCategory, document.getElementById('searchInput').value);
             } catch (error) {
                 console.error("Nepodařilo se načíst hráče z databáze:", error);
@@ -560,8 +549,6 @@
         function renderTable(categoryKey, filterText = '') {
             const tableBody = document.getElementById('tableBody');
             
-            // Pokud jsme v záložce overall, vezmeme všechny hráče. 
-            // Pokud v konkrétním kitu, vyfiltrujeme jen ty, co v něm mají tier (není "-")
             let data = categoriesData.overall || [];
             if (categoryKey !== 'overall') {
                 data = data.filter(player => player.tiers && player.tiers[categoryKey] && player.tiers[categoryKey] !== '-');
@@ -620,7 +607,10 @@
                             <span class="player-name">${player.name}</span>
                             <span class="player-title">${player.title}</span>
                         </div>
-                        <div class="player-region ${player.regionClass}">${player.region.substring(0,2)}</div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-left: 10px;">
+                            <div class="player-region ${player.regionClass}">${player.region ? player.region.substring(0,2) : 'EU'}</div>
+                            <span style="font-size: 0.7rem; color: #a0a6b5; font-weight: 600;">${player.points || 0} pts</span>
+                        </div>
                         <div class="player-tiers">
                             ${tiersHtml}
                         </div>
@@ -631,10 +621,8 @@
             tableBody.innerHTML = html || '<div style="padding: 20px; text-align: center; color: #a0a6b5;">Žádní hráči nenalezeni.</div>';
         }
 
-        // Spustíme načtení dat hned po startu stránky
         loadDataFromBot();
 
-        // Ovládání klikání na záložky (kity)
         const navItems = document.querySelectorAll('.nav-item');
         navItems.forEach(item => {
             item.addEventListener('click', () => {
@@ -647,12 +635,10 @@
             });
         });
 
-        // Vyhledávání hráčů
         document.getElementById('searchInput').addEventListener('input', (e) => {
             renderTable(currentCategory, e.target.value);
         });
 
-        // Vyskakovací okno (modal detail hráče)
         const modal = document.getElementById('playerModal');
         const closeModalBtn = document.getElementById('closeModal');
 
@@ -663,7 +649,7 @@
             document.getElementById('modalRegionText').textContent = player.region;
             document.getElementById('modalNameMCLink').href = `https://namemc.com/search?q=${player.name}`;
             document.getElementById('modalPosNum').textContent = rank + '.';
-            document.getElementById('modalPoints').textContent = player.points;
+            document.getElementById('modalPoints').textContent = (player.points || 0) + ' points';
             document.getElementById('modalCategoryName').textContent = currentCategory.toUpperCase();
 
             let modalTiersHtml = '';

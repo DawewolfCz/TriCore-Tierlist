@@ -6,19 +6,22 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Připojovací řetězec z MongoDB Atlas uložený v .env
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
-// Endpoint, který web zavolá, aby získal seznam hráčů
 app.get('/api/players', async (req, res) => {
     try {
         await client.connect();
-        const database = client.db('tricore_tierlist'); // Název vaší databáze
-        const collection = database.collection('users'); // Název vaší kolekce (zkontrolujte, kam bot ukládá data)
+        const database = client.db('tricore_tierlist');
         
-        // Získá všechny hráče z databáze
-        const players = await collection.find({}).toArray();
+        // Zkusíme najít data v kolekci 'players'
+        let players = await database.collection('players').find({}).toArray();
+        
+        // Pokud tam nic není, zkusíme kolekci 'usernames'
+        if (players.length === 0) {
+            players = await database.collection('usernames').find({}).toArray();
+        }
+        
         res.json(players);
     } catch (error) {
         console.error("Chyba při čtení z databáze:", error);
@@ -26,7 +29,6 @@ app.get('/api/players', async (req, res) => {
     }
 });
 
-// Automaticky servíruje soubory (index.html atd.) ze stejné složky
 app.use(express.static(path.join(__dirname)));
 
 app.listen(port, () => {

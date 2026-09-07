@@ -14,10 +14,8 @@ app.get('/api/players', async (req, res) => {
         await client.connect();
         const database = client.db('tricore_tierlist');
         
-        // Zkusíme najít data v kolekci 'players'
         let players = await database.collection('players').find({}).toArray();
         
-        // Pokud tam nic není, zkusíme kolekci 'usernames'
         if (players.length === 0) {
             players = await database.collection('usernames').find({}).toArray();
         }

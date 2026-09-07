@@ -67,9 +67,8 @@
                 }
                 
                 const players = await response.json();
-                listElement.innerHTML = ''; // Vymaže nápis o načítání
+                listElement.innerHTML = '';
 
-                // TADY PŘIDÁME TENTO ŘÁDEK PRO KONTROLU:
                 console.puvodniData = players; 
 
                 if (players.length === 0) {
@@ -89,7 +88,6 @@
             }
         }
 
-        // Spustí načítání hned po načtení stránky
         loadPlayers();
     </script>
 

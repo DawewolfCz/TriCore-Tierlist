@@ -465,7 +465,6 @@
         <input type="text" id="searchInput" class="search-input" placeholder="Search player...">
     </div>
 
-    <!-- Navigační lišta kitů -->
     <div class="nav-bar" id="navBar">
         <div class="nav-item active" data-category="overall">Overall</div>
         <div class="nav-item" data-category="neth axe">Neth Axe</div>
@@ -529,7 +528,6 @@
         let categoriesData = { overall: [] };
         let currentCategory = 'overall';
 
-        // Načtení dat přímo z našeho serveru (MongoDB přes Express API)
         async function loadDataFromBot() {
             try {
                 const response = await fetch('/api/players');

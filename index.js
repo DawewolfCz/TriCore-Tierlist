@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const mongoose = require('mongoose');
 
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
@@ -60,6 +60,24 @@ client.on('ready', () => {
     console.log(`Discord bot je přihlášen jako ${client.user.tag}!`);
 });
 
+client.on('messageCreate', async message => {
+    if (message.author.bot) return;
+
+    if (message.content === '!setup') {
+        const button = new ButtonBuilder()
+            .setCustomId('set_minecraft_nick')
+            .setLabel('Zaregistrovat nick')
+            .setStyle(ButtonStyle.Primary);
+
+        const row = new ActionRowBuilder().addComponents(button);
+
+        await message.channel.send({
+            content: 'Kliknutím na tlačítko níže si můžeš zaregistrovat nebo aktualizovat svůj Minecraft nick:',
+            components: [row]
+        });
+    }
+});
+
 client.on('interactionCreate', async interaction => {
     if (interaction.isButton()) {
         if (interaction.customId === 'set_minecraft_nick') {
@@ -81,13 +99,14 @@ client.on('interactionCreate', async interaction => {
         }
     } else if (interaction.isModalSubmit()) {
         if (interaction.customId === 'minecraft_nick_modal') {
-            const mcNick = interaction.fields.getTextInputValue('nick_input');
+            const mcNick = interaction.fields.getTextInputValue('nick_input').trim();
             const targetMember = interaction.member;
 
             const isRestricted = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted');
             const isRetired = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired');
 
-            const existingPlayer = await Player.findOne({ name: mcNick });
+            const existingPlayer = await Player.findOne({ name: { $regex: new RegExp(`^${mcNick}$`, 'i') } });
+            
             const sampleTiers = existingPlayer && existingPlayer.tiers ? existingPlayer.tiers : {
                 "neth axe": "-",
                 "explosive diarrhea": "-",
@@ -104,9 +123,9 @@ client.on('interactionCreate', async interaction => {
 
             try {
                 await Player.findOneAndUpdate(
-                    { name: mcNick },
+                    { name: existingPlayer ? existingPlayer.name : mcNick },
                     {
-                        name: mcNick,
+                        name: existingPlayer ? existingPlayer.name : mcNick,
                         region: "EU",
                         points: points,
                         title: title,
@@ -125,57 +144,6 @@ client.on('interactionCreate', async interaction => {
                 console.error(err);
                 await interaction.reply({ content: "Chyba při ukládání nicku do databáze.", ephemeral: true });
             }
-        }
-    }
-});
-
-client.on('messageCreate', async message => {
-    if (message.author.bot) return;
-
-    if (message.content.startsWith('!syncplayer')) {
-        const targetMember = message.mentions.members.first() || message.member;
-        
-        if (!targetMember) {
-            return message.reply("Uživatel nenalezen.");
-        }
-
-        const isRestricted = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted');
-        const isRetired = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired');
-
-        const existingPlayer = await Player.findOne({ name: targetMember.user.username });
-        const sampleTiers = existingPlayer && existingPlayer.tiers ? existingPlayer.tiers : {
-            "neth axe": "-",
-            "explosive diarrhea": "-",
-            "dia mace": "-",
-            "altarsmp": "-",
-            "poorsmp": "-",
-            "netherite berry": "-",
-            "drainpvp": "-",
-            "lt mace": "-"
-        };
-
-        const points = calculatePoints(sampleTiers);
-        const title = getTitleByPoints(points);
-
-        try {
-            await Player.findOneAndUpdate(
-                { name: targetMember.user.username },
-                {
-                    name: targetMember.user.username,
-                    region: "EU",
-                    points: points,
-                    title: title,
-                    isRestricted: isRestricted,
-                    isRetired: isRetired,
-                    tiers: sampleTiers
-                },
-                { upsert: true, new: true }
-            );
-
-            message.reply(`Hráč **${targetMember.user.username}** byl úspěšně aktualizován! (Restricted: ${isRestricted}, Retired: ${isRetired}, Body: ${points})`);
-        } catch (err) {
-            console.error(err);
-            message.reply("Chyba při ukládání hráče do databáze.");
         }
     }
 });

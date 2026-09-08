@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 const mongoose = require('mongoose');
 
-const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb+srv://dawewolf4_db_user:4OYh2oOSSp54XBfu@dawewolfcz.zjd02ee.mongodb.net/tricore_tierlist";
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log("Úspěšně připojeno k MongoDB!"))

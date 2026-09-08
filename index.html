@@ -41,11 +41,12 @@
             margin: 0 auto 20px auto;
             display: flex;
             justify-content: center;
+            gap: 10px;
         }
 
         .search-input {
             width: 100%;
-            max-width: 400px;
+            max-width: 350px;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             padding: 10px 16px;
@@ -57,6 +58,24 @@
         }
 
         .search-input:focus {
+            border-color: #ff0055;
+        }
+
+        .jump-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .jump-btn:hover {
+            background-color: #1e2333;
+            color: #fff;
             border-color: #ff0055;
         }
 
@@ -86,20 +105,10 @@
             transition: all 0.2s ease;
         }
 
-        .nav-item img {
-            width: 18px;
-            height: 18px;
-            filter: brightness(0.9);
-        }
-
         .nav-item:hover {
             background-color: #1e2333;
             color: var(--text-main);
             border-color: #4b5563;
-        }
-
-        .nav-item:hover img {
-            filter: brightness(1.2);
         }
 
         .nav-item.active {
@@ -107,10 +116,6 @@
             color: var(--text-main);
             border-color: #4b5563;
             border-bottom: 2px solid #ffaa00;
-        }
-
-        .nav-item.active img {
-            filter: brightness(1.2);
         }
 
         .ranking-container {
@@ -152,6 +157,17 @@
             background-color: rgba(255, 255, 255, 0.04);
         }
 
+        /* Stylování pro restricted a retired hráče */
+        .player-row.restricted {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .player-row.retired {
+            background-color: rgba(0, 0, 0, 0.2);
+            opacity: 0.75;
+        }
+
         .rank-skin-box {
             display: flex;
             align-items: center;
@@ -165,35 +181,9 @@
         }
 
         .rank-skin-box.rank-1 { background: linear-gradient(135deg, #fde047, #ca8a04); color: #000; }
-        .rank-skin-box.rank-2 { background: linear-gradient(135deg, #cbd5e1, #64748b); color: #000; }
+        .rank-skin-box.rank-2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #000; }
         .rank-skin-box.rank-3 { background: linear-gradient(135deg, #fb923c, #c2410c); color: #fff; }
-        .rank-skin-box.rank-4 { background: linear-gradient(135deg, #475569, #1e293b); color: #fff; }
-
-        .rank-skin-box.rank-1::after,
-        .rank-skin-box.rank-2::after,
-        .rank-skin-box.rank-3::after,
-        .rank-skin-box.rank-4::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 50%;
-            height: 200%;
-            background: linear-gradient(
-                to right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.5) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: rotate(30deg);
-            animation: shine 4s infinite ease-in-out;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; top: -100%; }
-            20% { left: 150%; top: 150%; }
-            100% { left: 150%; top: 150%; }
-        }
+        .rank-skin-box.rank-4 { background: linear-gradient(135deg, #6b21a8, #3b0764); color: #fff; }
 
         .player-rank-num {
             font-weight: 800;
@@ -201,7 +191,6 @@
             font-style: italic;
             width: 50px;
             text-align: center;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
             z-index: 2;
         }
 
@@ -211,7 +200,6 @@
             border-radius: 4px;
             margin-left: 10px;
             object-fit: contain;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.4));
             z-index: 2;
         }
 
@@ -230,9 +218,6 @@
         .player-title {
             font-size: 0.75rem;
             color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 4px;
             margin-top: 2px;
         }
 
@@ -258,202 +243,68 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 35px;
+            width: 38px;
+            padding: 3px 0;
+            border-radius: 4px;
         }
 
-        .tier-badge {
-            font-size: 0.75rem;
-            font-weight: 800;
+        /* Nové barvy tierů podle zadání */
+        .t1 { color: #fde047; font-weight: 800; } /* Zlatá / Žlutá */
+        .t2 { color: #f1f5f9; font-weight: 800; } /* Stříbrná / Bílá */
+        .t3 { color: #fb923c; font-weight: 800; } /* Oranžová */
+        .t4 { color: #c084fc; font-weight: 800; } /* Šedá do fialova */
+        .t5 { color: #94a3b8; font-weight: 800; } /* Čistě šedá */
+
+        /* Rozlišení sytosti pozadí pro HT vs LT v kitech */
+        .tier-slot.ht-bg {
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .tier-slot.lt-bg {
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
-        .ht1 { color: #ff0055; text-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
-        .lt1 { color: #fb923c; }
-        .ht2 { color: #fbbf24; }
-        .lt2 { color: #facc15; }
-        .ht3 { color: #a3e635; }
-        .ht4 { color: #38bdf8; }
-
+        /* Modal okno */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.75);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease;
         }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
+        .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-card {
-            background-color: #141721;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            width: 380px;
-            padding: 25px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            transform: scale(0.9);
-            transition: transform 0.2s ease;
+            background-color: #141721; border: 1px solid var(--border-color);
+            border-radius: 16px; width: 380px; padding: 25px; position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: scale(0.9); transition: transform 0.2s ease;
         }
-
-        .modal-overlay.active .modal-card {
-            transform: scale(1);
-        }
-
+        .modal-overlay.active .modal-card { transform: scale(1); }
         .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #1e2333;
-            border: none;
-            color: var(--text-muted);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
+            position: absolute; top: 15px; right: 15px; background: #1e2333;
+            border: none; color: var(--text-muted); width: 32px; height: 32px;
+            border-radius: 50%; font-size: 1rem; cursor: pointer;
         }
-
-        .modal-close:hover {
-            background: #2d364d;
-            color: #fff;
-        }
-
         .modal-avatar-container {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 3px solid #fde047;
-            background: #1e2333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            box-shadow: 0 0 15px rgba(253, 224, 71, 0.3);
-            overflow: hidden;
+            width: 90px; height: 90px; border-radius: 50%; border: 3px solid #fde047;
+            background: #1e2333; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; overflow: hidden;
         }
-
-        .modal-avatar-container img {
-            width: 75px;
-            height: 75px;
-            object-fit: contain;
-        }
-
-        .modal-username {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #c084fc 0%, #ff0055 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
+        .modal-avatar-container img { width: 75px; height: 75px; object-fit: contain; }
+        .modal-username { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; color: #fff; }
         .modal-badge {
-            background-color: #3b351c;
-            border: 1px solid #786619;
-            color: #fde047;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 8px;
+            background-color: #3b351c; border: 1px solid #786619; color: #fde047;
+            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-bottom: 8px;
         }
-
-        .modal-region {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
+        .modal-region { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 15px; }
         .modal-namemc {
-            background-color: #1a1f2c;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 20px;
-            transition: background 0.2s;
+            background-color: #1a1f2c; border: 1px solid var(--border-color); color: var(--text-muted);
+            padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; margin-bottom: 20px;
         }
-
-        .modal-namemc:hover {
-            background-color: #252a3a;
-            color: #fff;
-        }
-
-        .modal-section-title {
-            align-self: flex-start;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .modal-position-box {
-            width: 100%;
-            background-color: #10131a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-pos-number {
-            background: linear-gradient(135deg, #fde047, #ca8a04);
-            color: #000;
-            font-weight: 800;
-            font-style: italic;
-            font-size: 1rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-right: 12px;
-        }
-
-        .modal-pos-text {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #fff;
-        }
-
         .modal-tiers-box {
-            width: 100%;
-            background-color: #10131a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 10px;
+            width: 100%; background-color: #10131a; border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 12px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
         }
     </style>
 </head>
@@ -463,21 +314,23 @@
 
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="Search player...">
+        <button class="jump-btn" id="jumpRestrictedBtn">↓ Restricted</button>
     </div>
 
+    <!-- Aktualizovaná navigační lišta podle mctiers kitů (boat mace změněn na altarsmp) -->
     <div class="nav-bar" id="navBar">
         <div class="nav-item active" data-category="overall">Overall</div>
         <div class="nav-item" data-category="neth axe">Neth Axe</div>
         <div class="nav-item" data-category="explosive diarrhea">Explosive Diarrhea</div>
         <div class="nav-item" data-category="dia mace">Dia Mace</div>
-        <div class="nav-item" data-category="boat mace">Boat Mace</div>
+        <div class="nav-item" data-category="altarsmp">Altarsmp</div>
         <div class="nav-item" data-category="poorsmp">PoorSMP</div>
         <div class="nav-item" data-category="netherite berry">Netherite Berry</div>
         <div class="nav-item" data-category="drainpvp">DrainPVP</div>
         <div class="nav-item" data-category="lt mace">LT Mace</div>
     </div>
 
-    <div class="ranking-container">
+    <div class="ranking-container" id="rankingContainer">
         <div class="table-header">
             <span style="width: 175px;">Player</span>
             <span style="width: 250px;"></span>
@@ -488,6 +341,7 @@
         <div id="tableBody"></div>
     </div>
 
+    <!-- Modal detail -->
     <div class="modal-overlay" id="playerModal">
         <div class="modal-card">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -498,17 +352,9 @@
             <div class="modal-badge">🏆 <span id="modalTitleText">Combat Member</span></div>
             <div class="modal-region" id="modalRegionText">Europe</div>
             
-            <a href="#" target="_blank" class="modal-namemc" id="modalNameMCLink">
-                🔗 NameMC
-            </a>
+            <a href="#" target="_blank" class="modal-namemc" id="modalNameMCLink">🔗 NameMC</a>
 
-            <div class="modal-section-title">Position</div>
-            <div class="modal-position-box">
-                <span class="modal-pos-number" id="modalPosNum">1.</span>
-                <span class="modal-pos-text"><span id="modalCategoryName">OVERALL</span> (<span id="modalPoints">300 points</span>)</span>
-            </div>
-
-            <div class="modal-section-title">Tiers</div>
+            <div style="font-size: 0.75font; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Tiers</div>
             <div class="modal-tiers-box" id="modalTiersBox"></div>
         </div>
     </div>
@@ -518,7 +364,7 @@
             'neth axe',
             'explosive diarrhea',
             'dia mace',
-            'boat mace',
+            'altarsmp',
             'poorsmp',
             'netherite berry',
             'drainpvp',
@@ -528,85 +374,141 @@
         let categoriesData = { overall: [] };
         let currentCategory = 'overall';
 
+        // Pomocná funkce pro převod textu tieru (např. "ht1", "lt2") na CSS třídu barvy (t1, t2...) a určení sytosti pozadí
+        function parseTierClass(tierStr) {
+            if (!tierStr || tierStr === '-') return { colorClass: '', bgClass: '' };
+            const lower = tierStr.toLowerCase();
+            let numClass = 't5';
+            if (lower.includes('1')) numClass = 't1';
+            else if (lower.includes('2')) numClass = 't2';
+            else if (lower.includes('3')) numClass = 't3';
+            else if (lower.includes('4')) numClass = 't4';
+            else if (lower.includes('5')) numClass = 't5';
+
+            let bgClass = 'lt-bg';
+            if (lower.startsWith('ht')) {
+                bgClass = 'ht-bg';
+            }
+            return { colorClass: numClass, bgClass: bgClass };
+        }
+
+        // Dynamický titul podle bodů (mctiers styl)
+        function getTitleByPoints(points) {
+            const pts = points || 0;
+            if (pts >= 500) return "Combat Legend";
+            if (pts >= 300) return "Combat Master";
+            if (pts >= 150) return "Combat Veteran";
+            if (pts >= 50) return "Combat Warrior";
+            return "Combat Member";
+        }
+
         async function loadDataFromBot() {
             try {
                 const response = await fetch('/api/players');
-                if (!response.ok) {
-                    throw new Error('Chyba při komunikaci se serverem');
-                }
+                if (!response.ok) throw new Error('Chyba serveru');
                 const playersArray = await response.json();
                 
                 categoriesData.overall = playersArray;
                 renderTable(currentCategory, document.getElementById('searchInput').value);
             } catch (error) {
-                console.error("Nepodařilo se načíst hráče z databáze:", error);
+                console.error("Chyba při načítání:", error);
                 document.getElementById('tableBody').innerHTML = '<div style="padding: 20px; text-align: center; color: #ff5252;">Nepodařilo se načíst data z databáze.</div>';
             }
         }
 
         function renderTable(categoryKey, filterText = '') {
             const tableBody = document.getElementById('tableBody');
-            
             let data = categoriesData.overall || [];
+
             if (categoryKey !== 'overall') {
                 data = data.filter(player => player.tiers && player.tiers[categoryKey] && player.tiers[categoryKey] !== '-');
             }
-            
+
+            // Filtrování podle vyhledávání
             const filteredData = data.filter(player => player.name.toLowerCase().includes(filterText.toLowerCase()));
-            
+
+            // Třídění: Standardní hráči -> Retired hráči -> Restricted hráči na samém konci
+            filteredData.sort((a, b) => {
+                const aRestricted = a.isRestricted || (a.status && a.status.toLowerCase() === 'restricted') || false;
+                const bRestricted = b.isRestricted || (b.status && b.status.toLowerCase() === 'restricted') || false;
+                if (aRestricted !== bRestricted) return aRestricted ? 1 : -1;
+
+                const aRetired = a.isRetired || (a.status && a.status.toLowerCase() === 'retired') || false;
+                const bRetired = b.isRetired || (b.status && b.status.toLowerCase() === 'retired') || false;
+                if (aRetired !== bRetired) return aRetired ? 1 : -1;
+
+                return (b.points || 0) - (a.points || 0);
+            });
+
             let html = '';
-            
+            let restrictedElementId = null;
+
             filteredData.forEach((player, index) => {
                 const rank = index + 1;
-                let rankClass = '';
-                if (rank === 1) rankClass = 'rank-1';
-                else if (rank === 2) rankClass = 'rank-2';
-                else if (rank === 3) rankClass = 'rank-3';
-                else rankClass = 'rank-4';
+                const isRestricted = player.isRestricted || (player.status && player.status.toLowerCase() === 'restricted');
+                const isRetired = player.isRetired || (player.status && player.status.toLowerCase() === 'retired');
+
+                let rowClass = '';
+                if (isRestricted) {
+                    rowClass = 'restricted';
+                    if (!restrictedescentId) restrictedElementId = `player-row-${index}`;
+                } else if (isRetired) {
+                    rowClass = 'retired';
+                }
+
+                let rankClass = 'rank-4';
+                if (rank === 1 && !isRestricted && !isRetired) rankClass = 'rank-1';
+                else if (rank === 2 && !isRestricted && !isRetired) rankClass = 'rank-2';
+                else if (rank === 3 && !isRestricted && !isRetired) rankClass = 'rank-3';
 
                 let tiersHtml = '';
 
                 if (categoryKey === 'overall') {
                     allKits.forEach(kitName => {
                         const tierVal = player.tiers ? player.tiers[kitName] : '-';
+                        const parsed = parseTierClass(tierVal);
                         if (tierVal && tierVal !== '-') {
                             tiersHtml += `
-                                <div class="tier-slot">
-                                    <span style="font-size: 10px; color: #a0a6b5; text-transform: uppercase;">${kitName.substring(0,3)}</span>
-                                    <span class="tier-badge ${tierVal}">${tierVal.toUpperCase()}</span>
+                                <div class="tier-slot ${parsed.bgClass}">
+                                    <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${kitName.substring(0,3)}</span>
+                                    <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
                                 </div>
                             `;
                         } else {
                             tiersHtml += `
-                                <div class="tier-slot empty">
-                                    <span style="font-size: 10px; color: #555; text-transform: uppercase;">${kitName.substring(0,3)}</span>
-                                    <span class="tier-badge none" style="color: #555;">-</span>
+                                <div class="tier-slot" style="background: transparent; border: none;">
+                                    <span style="font-size: 9px; color: #555; text-transform: uppercase;">${kitName.substring(0,3)}</span>
+                                    <span class="tier-badge" style="color: #555;">-</span>
                                 </div>
                             `;
                         }
                     });
                 } else {
                     const tierVal = player.tiers ? player.tiers[categoryKey] : '-';
+                    const parsed = parseTierClass(tierVal);
                     tiersHtml += `
-                        <div class="tier-slot">
-                            <span style="font-size: 10px; color: #a0a6b5; text-transform: uppercase;">${categoryKey}</span>
-                            <span class="tier-badge ${tierVal}">${tierVal.toUpperCase()}</span>
+                        <div class="tier-slot ${parsed.bgClass}">
+                            <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${categoryKey.substring(0,3)}</span>
+                            <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
                         </div>
                     `;
                 }
 
+                const playerTitle = getTitleByPoints(player.points);
+                const displayRank = isRetired ? `R${player.retiredTier || 'lt2+'}` : `${rank}.`;
+
                 html += `
-                    <div class="player-row" onclick='openModal(${JSON.stringify(player)}, ${rank})'>
+                    <div id="player-row-${index}" class="player-row ${rowClass}" onclick='openModal(${JSON.stringify(player)}, "${displayRank}")'>
                         <div class="rank-skin-box ${rankClass}">
-                            <span class="player-rank-num">${rank}.</span>
+                            <span class="player-rank-num">${displayRank}</span>
                             <img src="https://mc-heads.net/avatar/${player.name}/44" class="player-avatar-skin" alt="Skin">
                         </div>
                         <div class="player-details">
-                            <span class="player-name">${player.name}</span>
-                            <span class="player-title">${player.title}</span>
+                            <span class="player-name">${player.name} ${isRetired ? '<span style="font-size:10px; color:#a0a6b5;">[RET]</span>' : ''}</span>
+                            <span class="player-title">${playerTitle}</span>
                         </div>
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-left: 10px;">
-                            <div class="player-region ${player.regionClass}">${player.region ? player.region.substring(0,2) : 'EU'}</div>
+                            <div class="player-region region-eu">${player.region ? player.region.substring(0,2) : 'EU'}</div>
                             <span style="font-size: 0.7rem; color: #a0a6b5; font-weight: 600;">${player.points || 0} pts</span>
                         </div>
                         <div class="player-tiers">
@@ -621,15 +523,14 @@
 
         loadDataFromBot();
 
+        // Přepínání navigačních kitů
         const navItems = document.querySelectorAll('.nav-item');
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 navItems.forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
-                
                 currentCategory = item.dataset.category;
-                const searchVal = document.getElementById('searchInput').value;
-                renderTable(currentCategory, searchVal);
+                renderTable(currentCategory, document.getElementById('searchInput').value);
             });
         });
 
@@ -637,44 +538,44 @@
             renderTable(currentCategory, e.target.value);
         });
 
+        // Tlačítko pro skok na restricted hráče na konci
+        document.getElementById('jumpRestrictedBtn').addEventListener('click', () => {
+            const restrictedRows = document.querySelectorAll('.player-row.restricted');
+            if (restrictedRows.length > 0) {
+                restrictedRows[0].scrollIntoView({ behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }
+        });
+
+        // Modal okno
         const modal = document.getElementById('playerModal');
         const closeModalBtn = document.getElementById('closeModal');
 
-        function openModal(player, rank) {
+        function openModal(player, rankDisplay) {
             document.getElementById('modalAvatar').src = `https://mc-heads.net/avatar/${player.name}/75`;
             document.getElementById('modalUsername').textContent = player.name;
-            document.getElementById('modalTitleText').textContent = player.title;
-            document.getElementById('modalRegionText').textContent = player.region;
+            document.getElementById('modalTitleText').textContent = getTitleByPoints(player.points);
+            document.getElementById('modalRegionText').textContent = player.region || 'Europe';
             document.getElementById('modalNameMCLink').href = `https://namemc.com/search?q=${player.name}`;
-            document.getElementById('modalPosNum').textContent = rank + '.';
-            document.getElementById('modalPoints').textContent = (player.points || 0) + ' points';
-            document.getElementById('modalCategoryName').textContent = currentCategory.toUpperCase();
 
             let modalTiersHtml = '';
             allKits.forEach(kitName => {
                 const tierVal = player.tiers && player.tiers[kitName] ? player.tiers[kitName] : '-';
+                const parsed = parseTierClass(tierVal);
                 modalTiersHtml += `
-                    <div class="tier-slot" style="width: 60px;">
-                        <span style="font-size: 11px; color: #a0a6b5; text-align: center; margin-bottom: 2px;">${kitName}</span>
-                        <span class="tier-badge ${tierVal}">${tierVal.toUpperCase()}</span>
+                    <div class="tier-slot ${parsed.bgClass}" style="width: 55px; padding: 6px;">
+                        <span style="font-size: 10px; color: #a0a6b5; text-align: center; margin-bottom: 2px;">${kitName}</span>
+                        <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
                     </div>
                 `;
             });
             document.getElementById('modalTiersBox').innerHTML = modalTiersHtml;
-
             modal.classList.add('active');
         }
 
-        closeModalBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
+        closeModalBtn.addEventListener('click', () => modal.classList.remove('active'));
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
     </script>
-
 </body>
 </html>

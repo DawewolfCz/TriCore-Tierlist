@@ -1,95 +1,117 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TriCore Tierlist - Seznam hráčů</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 {
-            color: #4CAF50;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            background: #2d2d2d;
-            margin: 10px 0;
-            padding: 12px 15px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 18px;
-        }
-        .loading {
-            text-align: center;
-            color: #888;
-        }
-    </style>
-</head>
-<body>
+require('dotenv').config();
+const { Client, GatewayIntentBits } = require('discord.js');
+const mongoose = require('mongoose');
 
-    <div class="container">
-        <h1>TriCore Tierlist - Registrovaní hráči</h1>
-        <p>Seznam hráčů propojených s Discordem:</p>
+const MONGO_URI = process.env.MONGODB_URI || "mongodb+srv://dawewolf4_db_user:4OYh2oOSSp54XBfu@dawewolfcz.zjd02ee.mongodb.net";
+
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("Úspěšně připojeno k MongoDB!"))
+    .catch(err => console.error("Chyba při připojování k MongoDB:", err));
+
+const playerSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true },
+    region: { type: String, default: "EU" },
+    points: { type: Number, default: 0 },
+    title: { type: String, default: "Combat Member" },
+    isRestricted: { type: Boolean, default: false },
+    isRetired: { type: Boolean, default: false },
+    tiers: {
+        type: Map,
+        of: String,
+        default: {}
+    }
+});
+
+const Player = mongoose.model('Player', playerSchema);
+
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+
+function calculatePoints(tiersObj) {
+    let totalPoints = 0;
+    const tierValues = {
+        "ht1": 100, "lt1": 80,
+        "ht2": 65,  "lt2": 50,
+        "ht3": 35,  "lt3": 25,
+        "ht4": 15,  "lt4": 10,
+        "ht5": 5,   "lt5": 2
+    };
+
+    for (const kit in tiersObj) {
+        const val = tiersObj[kit] ? tiersObj[kit].toLowerCase().trim() : "";
+        if (tierValues[val]) {
+            totalPoints += tierValues[val];
+        }
+    }
+    return totalPoints;
+}
+
+function getTitleByPoints(points) {
+    if (points >= 500) return "Combat Legend";
+    if (points >= 300) return "Combat Master";
+    if (points >= 150) return "Combat Veteran";
+    if (points >= 50) return "Combat Warrior";
+    return "Combat Member";
+}
+
+client.on('ready', () => {
+    console.log(`Discord bot je přihlášen jako ${client.user.tag}!`);
+});
+
+client.on('messageCreate', async message => {
+    if (message.author.bot) return;
+
+    if (message.content.startsWith('!syncplayer')) {
+        const targetMember = message.mentions.members.first() || message.member;
         
-        <ul id="players-list">
-            <li class="loading">Načítám hráče z databáze...</li>
-        </ul>
-    </div>
-
-    <script>
-        async function loadPlayers() {
-            const listElement = document.getElementById('players-list');
-            try {
-                const response = await fetch('/api/players');
-                if (!response.ok) {
-                    throw new Error('Chyba serveru: ' + response.status);
-                }
-                
-                const players = await response.json();
-                listElement.innerHTML = '';
-
-                console.puvodniData = players; 
-
-                if (players.length === 0) {
-                    listElement.innerHTML = '<li style="justify-content: center; color: #888;">Databáze vrátila prázdný seznam [].</li>';
-                    return;
-                }
-
-                players.forEach(player => {
-                    const li = document.createElement('li');
-                    const nick = player.minecraftNick || player.nick || player.username || JSON.stringify(player);
-                    li.innerHTML = `<span>🎮 <strong>${nick}</strong></span>`;
-                    listElement.appendChild(li);
-                });
-            } catch (error) {
-                console.error('Nepodařilo se načíst hráče:', error);
-                listElement.innerHTML = `<li style="justify-content: center; color: #ff5252;">Chyba: ${error.message}</li>`;
-            }
+        if (!targetMember) {
+            return message.reply("Uživatel nenalezen.");
         }
 
-        loadPlayers();
-    </script>
+        const isRestricted = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted');
+        const isRetired = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired');
 
-</body>
-</html>
+        const sampleTiers = {
+            "neth axe": "ht1",
+            "explosive diarrhea": "lt3",
+            "dia mace": "-",
+            "altarsmp": "ht2",
+            "poorsmp": "-",
+            "netherite berry": "-",
+            "drainpvp": "-",
+            "lt mace": "-"
+        };
+
+        const points = calculatePoints(sampleTiers);
+        const title = getTitleByPoints(points);
+
+        try {
+            await Player.findOneAndUpdate(
+                { name: targetMember.user.username },
+                {
+                    name: targetMember.user.username,
+                    region: "EU",
+                    points: points,
+                    title: title,
+                    isRestricted: isRestricted,
+                    isRetired: isRetired,
+                    tiers: sampleTiers
+                },
+                { upsert: true, new: true }
+            );
+
+            message.reply(`Hráč **${targetMember.user.username}** byl úspěšně aktualizován! (Restricted: ${isRestricted}, Retired: ${isRetired}, Body: ${points})`);
+        } catch (err) {
+            console.error(err);
+            message.reply("Chyba při ukládání hráče do databáze.");
+        }
+    }
+});
+
+client.login(process.env.DISCORD_TOKEN);

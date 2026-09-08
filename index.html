@@ -21,6 +21,9 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .main-title {
@@ -126,6 +129,7 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            flex: 1;
         }
 
         .table-header {
@@ -262,6 +266,34 @@
             border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
+        footer {
+            max-width: 1100px;
+            width: 100%;
+            margin: 40px auto 10px auto;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        footer .links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        footer .links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer .links a:hover {
+            color: var(--text-main);
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -270,6 +302,7 @@
             z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
+        
         .modal-card {
             background-color: #141721; border: 1px solid var(--border-color);
             border-radius: 16px; width: 380px; padding: 25px; position: relative;
@@ -277,11 +310,15 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: scale(0.9); transition: transform 0.2s ease;
         }
         .modal-overlay.active .modal-card { transform: scale(1); }
+        
         .modal-close {
             position: absolute; top: 15px; right: 15px; background: #1e2333;
             border: none; color: var(--text-muted); width: 32px; height: 32px;
             border-radius: 50%; font-size: 1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
         }
+        .modal-close:hover { color: #fff; background: #2a3147; }
+
         .modal-avatar-container {
             width: 90px; height: 90px; border-radius: 50%; border: 3px solid #fde047;
             background: #1e2333; display: flex; align-items: center; justify-content: center;
@@ -298,6 +335,7 @@
             background-color: #1a1f2c; border: 1px solid var(--border-color); color: var(--text-muted);
             padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; margin-bottom: 20px;
         }
+        .modal-namemc:hover { color: #fff; border-color: #4b5563; }
         .modal-tiers-box {
             width: 100%; background-color: #10131a; border: 1px solid var(--border-color);
             border-radius: 8px; padding: 12px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
@@ -336,6 +374,17 @@
         <div id="tableBody"></div>
     </div>
 
+    <footer>
+        <p>&copy; 2026 TriCore Tierlist. Všechna práva vyhrazena.</p>
+        <p style="font-size: 0.75rem; color: #666; margin-top: 5px;">
+            Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+        </p>
+        <div class="links">
+            <a href="#" onclick="openModalById('privacyModal'); return false;">Privacy Policy</a>
+            <a href="#" onclick="openModalById('cookiesModal'); return false;">Cookie Policy</a>
+        </div>
+    </footer>
+
     <div class="modal-overlay" id="playerModal">
         <div class="modal-card">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -348,8 +397,34 @@
             
             <a href="#" target="_blank" class="modal-namemc" id="modalNameMCLink">🔗 NameMC</a>
 
-            <div style="font-size: 0.75font; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Tiers</div>
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Tiers</div>
             <div class="modal-tiers-box" id="modalTiersBox"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="privacyModal">
+        <div class="modal-card" style="width: 420px; align-items: flex-start;">
+            <button class="modal-close" onclick="closeModalById('privacyModal')">&times;</button>
+            <div class="modal-username" style="font-size: 1.2rem; margin-bottom: 15px; width: 100%; text-align: center;">Privacy Policy</div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; width: 100%;">
+                <p style="margin-bottom: 10px;">Tento web (TriCore Tierlist) zpracovává pouze minimální množství údajů nezbytných pro fungování PVP žebříčku:</p>
+                <ul style="padding-left: 20px; margin-bottom: 10px;">
+                    <li>Minecraft nicky a herní statistiky (body, kity, tiery).</li>
+                    <li>Identifikátory spojené s propojením přes Discord bota.</li>
+                </ul>
+                <p>Tyto údaje jsou využívány výhradně pro účely zobrazení veřejného žebříčku. Žádná data neposkytujeme třetím stranám.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cookiesModal">
+        <div class="modal-card" style="width: 420px; align-items: flex-start;">
+            <button class="modal-close" onclick="closeModalById('cookiesModal')">&times;</button>
+            <div class="modal-username" style="font-size: 1.2rem; margin-bottom: 15px; width: 100%; text-align: center;">Cookie Policy</div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; width: 100%;">
+                <p style="margin-bottom: 10px;">Tento web využívá pouze základní lokální úložiště (LocalStorage) nebo technické cookies čistě pro plynulý chod stránek a zapamatování filtrů.</p>
+                <p>Nezpracováváme žádné marketingové ani reklamní cookies třetích stran.</p>
+            </div>
         </div>
     </div>
 
@@ -431,7 +506,6 @@
             });
 
             let html = '';
-            let restrictedElementId = null;
 
             filteredData.forEach((player, index) => {
                 const rank = index + 1;
@@ -441,7 +515,6 @@
                 let rowClass = '';
                 if (isRestricted) {
                     rowClass = 'restricted';
-                    if (!restrictedescentId) restrictedElementId = `player-row-${index}`;
                 } else if (isRetired) {
                     rowClass = 'retired';
                 }
@@ -488,7 +561,7 @@
                 const displayRank = isRetired ? `R${player.retiredTier || 'lt2+'}` : `${rank}.`;
 
                 html += `
-                    <div id="player-row-${index}" class="player-row ${rowClass}" onclick='openModal(${JSON.stringify(player)}, "${displayRank}")'>
+                    <div class="player-row ${rowClass}" onclick='openModal(${JSON.stringify(player)}, "${displayRank}")'>
                         <div class="rank-skin-box ${rankClass}">
                             <span class="player-rank-num">${displayRank}</span>
                             <img src="https://mc-heads.net/avatar/${player.name}/44" class="player-avatar-skin" alt="Skin">
@@ -536,7 +609,7 @@
             }
         });
 
-        const modal = document.getElementById('playerModal');
+        const playerModal = document.getElementById('playerModal');
         const closeModalBtn = document.getElementById('closeModal');
 
         function openModal(player, rankDisplay) {
@@ -558,11 +631,26 @@
                 `;
             });
             document.getElementById('modalTiersBox').innerHTML = modalTiersHtml;
-            modal.classList.add('active');
+            playerModal.classList.add('active');
         }
 
-        closeModalBtn.addEventListener('click', () => modal.classList.remove('active'));
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+        closeModalBtn.addEventListener('click', () => playerModal.classList.remove('active'));
+
+        function openModalById(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModalById(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>

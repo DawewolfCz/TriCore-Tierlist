@@ -6,6 +6,36 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("Úspěšně připojeno k MongoDB!"))
     .catch(err => console.error("Chyba:", err));
 
+const express = require('express');
+const path = require('path');
+const app = express();
+
+const port = process.env.PORT || 10000;
+
+app.use(express.json());
+
+app.use(express.static(path.join(__dirname)));
+
+app.get('/api/players', (req, res) => {
+    const players = [
+        {
+            name: "ExamplePlayer",
+            points: 350,
+            region: "EU",
+            status: "active",
+            tiers: {
+                "neth axe": "ht1",
+                "dia mace": "lt2"
+            }
+        }
+    ];
+    res.json(players);
+});
+
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port ${port}`);
+});
+
 const playerSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
     region: { type: String, default: "EU" },

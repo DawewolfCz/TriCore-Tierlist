@@ -443,6 +443,24 @@
         let categoriesData = { overall: [] };
         let currentCategory = 'overall';
 
+        function getPlayerTier(player, kitName) {
+            if (!player || !player.tiers) return '-';
+            if (player.tiers[kitName] !== undefined) return player.tiers[kitName];
+            
+            if (kitName === 'altarsmp') {
+                if (player.tiers['alt'] !== undefined) return player.tiers['alt'];
+                if (player.tiers['altar'] !== undefined) return player.tiers['altar'];
+            }
+            
+            const lowerKey = kitName.toLowerCase();
+            for (const key in player.tiers) {
+                if (key.toLowerCase() === lowerKey) {
+                    return player.tiers[key];
+                }
+            }
+            return '-';
+        }
+
         function parseTierClass(tierStr) {
             if (!tierStr || tierStr === '-') return { colorClass: '', bgClass: '' };
             const lower = tierStr.toLowerCase();
@@ -488,7 +506,10 @@
             let data = categoriesData.overall || [];
 
             if (categoryKey !== 'overall') {
-                data = data.filter(player => player.tiers && player.tiers[categoryKey] && player.tiers[categoryKey] !== '-');
+                data = data.filter(player => {
+                    const val = getPlayerTier(player, categoryKey);
+                    return val && val !== '-';
+                });
             }
 
             const filteredData = data.filter(player => player.name.toLowerCase().includes(filterText.toLowerCase()));
@@ -505,10 +526,33 @@
                 return (b.points || 0) - (a.points || 0);
             });
 
+            let ranks = [];
+            for (let i = 0; i < filteredData.length; i++) {
+                const isRestricted = filteredData[i].isRestricted || (filteredData[i].status && filteredData[i].status.toLowerCase() === 'restricted');
+                const isRetired = filteredData[i].isRetired || (filteredData[i].status && filteredData[i].status.toLowerCase() === 'retired');
+                
+                if (isRestricted || isRetired) {
+                    ranks.push(i + 1);
+                    continue;
+                }
+
+                if (i > 0 && filteredData[i].points === filteredData[i-1].points) {
+                    const prevRestricted = filteredData[i-1].isRestricted || (filteredData[i-1].status && filteredData[i-1].status.toLowerCase() === 'restricted');
+                    const prevRetired = filteredData[i-1].isRetired || (filteredData[i-1].status && filteredData[i-1].status.toLowerCase() === 'retired');
+                    if (prevRestricted === isRestricted && prevRetired === isRetired) {
+                        ranks.push(ranks[i-1]);
+                    } else {
+                        ranks.push(i + 1);
+                    }
+                } else {
+                    ranks.push(i + 1);
+                }
+            }
+
             let html = '';
 
             filteredData.forEach((player, index) => {
-                const rank = index + 1;
+                const rank = ranks[index];
                 const isRestricted = player.isRestricted || (player.status && player.status.toLowerCase() === 'restricted');
                 const isRetired = player.isRetired || (player.status && player.status.toLowerCase() === 'retired');
 
@@ -528,30 +572,30 @@
 
                 if (categoryKey === 'overall') {
                     allKits.forEach(kitName => {
-                        const tierVal = player.tiers ? player.tiers[kitName] : '-';
+                        const tierVal = getPlayerTier(player, kitName);
                         const parsed = parseTierClass(tierVal);
                         if (tierVal && tierVal !== '-') {
                             tiersHtml += `
                                 <div class="tier-slot ${parsed.bgClass}">
-                                    <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${kitName.substring(0,3)}</span>
+                                    <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
                                     <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
                                 </div>
                             `;
                         } else {
                             tiersHtml += `
                                 <div class="tier-slot" style="background: transparent; border: none;">
-                                    <span style="font-size: 9px; color: #555; text-transform: uppercase;">${kitName.substring(0,3)}</span>
+                                    <span style="font-size: 9px; color: #555; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
                                     <span class="tier-badge" style="color: #555;">-</span>
                                 </div>
                             `;
                         }
                     });
                 } else {
-                    const tierVal = player.tiers ? player.tiers[categoryKey] : '-';
+                    const tierVal = getPlayerTier(player, categoryKey);
                     const parsed = parseTierClass(tierVal);
                     tiersHtml += `
                         <div class="tier-slot ${parsed.bgClass}">
-                            <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${categoryKey.substring(0,3)}</span>
+                            <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${categoryKey === 'altarsmp' ? 'alt' : categoryKey.substring(0,3)}</span>
                             <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
                         </div>
                     `;
@@ -621,7 +665,7 @@
 
             let modalTiersHtml = '';
             allKits.forEach(kitName => {
-                const tierVal = player.tiers && player.tiers[kitName] ? player.tiers[kitName] : '-';
+                const tierVal = getPlayerTier(player, kitName);
                 const parsed = parseTierClass(tierVal);
                 modalTiersHtml += `
                     <div class="tier-slot ${parsed.bgClass}" style="width: 55px; padding: 6px;">

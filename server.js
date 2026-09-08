@@ -18,15 +18,18 @@ const playerSchema = new mongoose.Schema({
     region: String,
     status: String,
     tiers: Object
-});
-const Player = mongoose.model('Player', playerSchema);
+}, { strict: false });
+
+const Player = mongoose.model('Player', playerSchema, 'players');
 
 app.get('/api/players', async (req, res) => {
     try {
         const players = await Player.find({});
+        console.log("Found players in DB:", players.length); 
         res.json(players);
     } catch (err) {
-        res.status(500).json({ error: "Failed to fetch players" });
+        console.error("DB Error:", err);
+        res.status(500).json({ error: err.message });
     }
 });
 

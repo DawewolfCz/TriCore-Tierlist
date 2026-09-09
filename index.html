@@ -530,7 +530,7 @@
         </div>
     </div>
 
-    
+   
     <div class="modal-overlay" id="cookiesModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('cookiesModal')">&times;</button>
@@ -554,45 +554,50 @@
             'lt mace'
         ];
 
-        // Mřížka váhy tierů pro řazení od NEJLEPŠÍHO (nejnižší číslo = nejlepší)
-        const tierWeights = {
-            'ht1': 1,  'lt1': 2,
-            'ht2': 3,  'lt2': 4,
-            'ht3': 5,  'lt3': 6,
-            'ht4': 7,  'lt4': 8,
-            'ht5': 9,  'lt5': 10,
-            't1': 2,   't2': 4, 't3': 6, 't4': 8, 't5': 10,
-            '-': 99
-        };
+        
+        function getTierWeight(tierStr) {
+            if (!tierStr || tierStr === '-' || tierStr === 'none') return 99;
+            const cleaned = tierStr.toString().toLowerCase().trim();
+
+            if (cleaned === 'ht1') return 1;
+            if (cleaned === 'lt1' || cleaned === 't1') return 2;
+            if (cleaned === 'ht2') return 3;
+            if (cleaned === 'lt2' || cleaned === 't2') return 4;
+            if (cleaned === 'ht3') return 5;
+            if (cleaned === 'lt3' || cleaned === 't3') return 6;
+            if (cleaned === 'ht4') return 7;
+            if (cleaned === 'lt4' || cleaned === 't4') return 8;
+            if (cleaned === 'ht5') return 9;
+            if (cleaned === 'lt5' || cleaned === 't5') return 10;
+
+            return 98;
+        }
 
         let categoriesData = { overall: [] };
         let currentCategory = 'overall';
 
         function getPlayerTier(player, kitName) {
             if (!player || !player.tiers) return '-';
+            
+           
             if (player.tiers[kitName] !== undefined) return player.tiers[kitName];
             
+           
             if (kitName === 'altarsmp') {
                 if (player.tiers['alt'] !== undefined) return player.tiers['alt'];
                 if (player.tiers['altar'] !== undefined) return player.tiers['altar'];
             }
             
-            const lowerKey = kitName.toLowerCase();
+            // Hledání nezávisle na velkých/malých písmenech
+            const lowerKey = kitName.toLowerCase().trim();
             for (const key in player.tiers) {
-                if (key.toLowerCase() === lowerKey) {
+                if (key.toLowerCase().trim() === lowerKey) {
                     return player.tiers[key];
                 }
             }
             return '-';
         }
 
-        function getTierWeight(tierStr) {
-            if (!tierStr || tierStr === '-') return 99;
-            const cleaned = tierStr.toLowerCase().trim();
-            return tierWeights[cleaned] || 98;
-        }
-
-        // Seřadí kity daného hráče od nejlepšího po nejhorší
         function getSortedPlayerKits(player) {
             const playerKits = allKits.map(kitName => {
                 const tierVal = getPlayerTier(player, kitName);
@@ -603,14 +608,16 @@
                 };
             });
 
-            // Řazení od nejnižší váhy (1) po nejvyšší (99)
+            // Seřadí kity od nejnižší váhy (1 = HT1) po nejvyšší (99 = neodehráno)
             playerKits.sort((a, b) => a.weight - b.weight);
             return playerKits;
         }
 
         function parseTierClass(tierStr) {
-            if (!tierStr || tierStr === '-') return { colorClass: '', bgClass: '', isHT: false, tierNum: 0 };
-            const lower = tierStr.toLowerCase();
+            if (!tierStr || tierStr === '-' || tierStr === 'none') {
+                return { colorClass: '', bgClass: '', isHT: false, tierNum: 0 };
+            }
+            const lower = tierStr.toString().toLowerCase().trim();
             let numClass = 't5';
             let tierNum = 5;
 
@@ -780,7 +787,7 @@
             `;
         }
 
-      
+        
         function renderKitColumns(kitName, filterText = '') {
             const container = document.getElementById('rankingContainer');
             let data = categoriesData.overall || [];

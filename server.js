@@ -5,7 +5,6 @@ const app = express();
 
 const port = process.env.PORT || 10000;
 
-
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -34,7 +33,6 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model('Player', playerSchema, 'players');
 
-
 app.get('/api/players', async (req, res) => {
     try {
         const players = await Player.find({});
@@ -46,8 +44,7 @@ app.get('/api/players', async (req, res) => {
     }
 });
 
-
-app.get('*', (req, res) => {
+app.get('/*splat', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 

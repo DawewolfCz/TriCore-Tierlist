@@ -133,7 +133,6 @@
             width: 100%;
         }
 
-        
         .table-header {
             display: flex;
             padding: 14px 20px;
@@ -268,7 +267,6 @@
             border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
-        
         .tier-columns-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -424,15 +422,23 @@
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
         .modal-card {
-            background-color: #141721; border: 1px solid var(--border-color);
-            border-radius: 16px; width: 380px; padding: 25px; position: relative;
-            display: flex; flex-direction: column; align-items: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: scale(0.9); transition: transform 0.2s ease;
+            background-color: #12141d;
+            border: 1px solid #232838;
+            border-radius: 20px;
+            width: 440px;
+            padding: 25px 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            transform: scale(0.92);
+            transition: transform 0.2s ease;
         }
         .modal-overlay.active .modal-card { transform: scale(1); }
         
         .modal-close {
-            position: absolute; top: 15px; right: 15px; background: #1e2333;
+            position: absolute; top: 15px; right: 15px; background: #1c202e;
             border: none; color: var(--text-muted); width: 32px; height: 32px;
             border-radius: 50%; font-size: 1rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
@@ -440,26 +446,88 @@
         .modal-close:hover { color: #fff; background: #2a3147; }
 
         .modal-avatar-container {
-            width: 90px; height: 90px; border-radius: 50%; border: 3px solid #fde047;
-            background: #1e2333; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 12px; overflow: hidden;
+            width: 80px; height: 80px; border-radius: 18px;
+            background: #1c202e; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; overflow: hidden; border: 1px solid #2d3448;
         }
-        .modal-avatar-container img { width: 75px; height: 75px; object-fit: contain; }
-        .modal-username { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; color: #fff; }
-        .modal-badge {
-            background-color: #3b351c; border: 1px solid #786619; color: #fde047;
-            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-bottom: 8px;
+        .modal-avatar-container img { width: 68px; height: 68px; object-fit: contain; }
+        
+        .modal-username { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; color: #fff; letter-spacing: 0.5px; }
+        
+        .modal-stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: #181c28;
+            padding: 6px 14px;
+            border-radius: 10px;
+            border: 1px solid #232838;
         }
-        .modal-region { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 15px; }
-        .modal-namemc {
-            background-color: #1a1f2c; border: 1px solid var(--border-color); color: var(--text-muted);
-            padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; margin-bottom: 20px;
+
+        .modal-rank-badge {
+            background-color: #272d3f;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 800;
         }
-        .modal-namemc:hover { color: #fff; border-color: #4b5563; }
-        .modal-tiers-box {
-            width: 100%; background-color: #10131a; border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 12px; display: flex; justify-content: flex-start; flex-wrap: wrap; gap: 8px;
+
+        .modal-points-text {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
         }
+
+        .modal-title-tag {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #8b5cf6;
+        }
+
+        .modal-kits-grid {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #1c202e;
+            flex-wrap: wrap;
+        }
+
+        .profile-kit-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-kit-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #181c28;
+            border: 1px solid #2a3147;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .profile-tier-badge {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .badge-ht { background-color: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.4); }
+        .badge-lt { background-color: rgba(147, 51, 234, 0.2); color: #c084fc; border: 1px solid rgba(147, 51, 234, 0.4); }
+        .badge-none { background-color: rgba(255, 255, 255, 0.05); color: #555; border: 1px solid transparent; }
     </style>
 </head>
 <body>
@@ -496,7 +564,6 @@
         </div>
     </footer>
 
-    
     <div class="modal-overlay" id="playerModal">
         <div class="modal-card">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -504,17 +571,17 @@
                 <img id="modalAvatar" src="" alt="Avatar">
             </div>
             <div class="modal-username" id="modalUsername">PlayerName</div>
-            <div class="modal-badge">🏆 <span id="modalTitleText">Combat Member</span></div>
-            <div class="modal-region" id="modalRegionText">Europe</div>
             
-            <a href="#" target="_blank" class="modal-namemc" id="modalNameMCLink">🔗 NameMC</a>
+            <div class="modal-stats-bar">
+                <span class="modal-rank-badge" id="modalRankText">1.</span>
+                <span class="modal-points-text" id="modalPointsText">0 points</span>
+                <span class="modal-title-tag" id="modalTitleText">Combat Member</span>
+            </div>
 
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Tiers (Sorted Best to Worst)</div>
-            <div class="modal-tiers-box" id="modalTiersBox"></div>
+            <div class="modal-kits-grid" id="modalKitsGrid"></div>
         </div>
     </div>
 
-    
     <div class="modal-overlay" id="privacyModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('privacyModal')">&times;</button>
@@ -530,7 +597,6 @@
         </div>
     </div>
 
-   
     <div class="modal-overlay" id="cookiesModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('cookiesModal')">&times;</button>
@@ -554,7 +620,17 @@
             'lt mace'
         ];
 
-        
+        const kitIcons = {
+            'neth axe': '🪓',
+            'explosive diarrhea': '💥',
+            'dia mace': '🔨',
+            'altarsmp': '🔮',
+            'poorsmp': '🗡️',
+            'netherite berry': '🫐',
+            'drainpvp': '🛡️',
+            'lt mace': '⚡'
+        };
+
         function getTierWeight(tierStr) {
             if (!tierStr || tierStr === '-' || tierStr === 'none') return 99;
             const cleaned = tierStr.toString().toLowerCase().trim();
@@ -578,17 +654,13 @@
 
         function getPlayerTier(player, kitName) {
             if (!player || !player.tiers) return '-';
-            
-           
             if (player.tiers[kitName] !== undefined) return player.tiers[kitName];
             
-           
             if (kitName === 'altarsmp') {
                 if (player.tiers['alt'] !== undefined) return player.tiers['alt'];
                 if (player.tiers['altar'] !== undefined) return player.tiers['altar'];
             }
             
-            // Hledání nezávisle na velkých/malých písmenech
             const lowerKey = kitName.toLowerCase().trim();
             for (const key in player.tiers) {
                 if (key.toLowerCase().trim() === lowerKey) {
@@ -608,14 +680,13 @@
                 };
             });
 
-            // Seřadí kity od nejnižší váhy (1 = HT1) po nejvyšší (99 = neodehráno)
             playerKits.sort((a, b) => a.weight - b.weight);
             return playerKits;
         }
 
         function parseTierClass(tierStr) {
             if (!tierStr || tierStr === '-' || tierStr === 'none') {
-                return { colorClass: '', bgClass: '', isHT: false, tierNum: 0 };
+                return { colorClass: '', bgClass: 'badge-none', isHT: false, tierNum: 0 };
             }
             const lower = tierStr.toString().toLowerCase().trim();
             let numClass = 't5';
@@ -627,10 +698,10 @@
             else if (lower.includes('4')) { numClass = 't4'; tierNum = 4; }
             else if (lower.includes('5')) { numClass = 't5'; tierNum = 5; }
 
-            let bgClass = 'lt-bg';
+            let bgClass = 'badge-lt';
             let isHT = false;
             if (lower.startsWith('ht')) {
-                bgClass = 'ht-bg';
+                bgClass = 'badge-ht';
                 isHT = true;
             }
             return { colorClass: numClass, bgClass: bgClass, isHT: isHT, tierNum: tierNum };
@@ -667,7 +738,6 @@
             }
         }
 
-        
         function renderOverallTable(filterText = '') {
             const container = document.getElementById('rankingContainer');
             let data = categoriesData.overall || [];
@@ -728,7 +798,6 @@
                 else if (rank === 2 && !isRestricted && !isRetired) rankClass = 'rank-2';
                 else if (rank === 3 && !isRestricted && !isRetired) rankClass = 'rank-3';
 
-                
                 const sortedKits = getSortedPlayerKits(player);
                 let tiersHtml = '';
 
@@ -787,7 +856,6 @@
             `;
         }
 
-        
         function renderKitColumns(kitName, filterText = '') {
             const container = document.getElementById('rankingContainer');
             let data = categoriesData.overall || [];
@@ -878,28 +946,34 @@
         const playerModal = document.getElementById('playerModal');
         const closeModalBtn = document.getElementById('closeModal');
 
-        
         function openModal(player, rankDisplay) {
-            document.getElementById('modalAvatar').src = `https://mc-heads.net/avatar/${player.name}/75`;
+            document.getElementById('modalAvatar').src = `https://mc-heads.net/avatar/${player.name}/68`;
             document.getElementById('modalUsername').textContent = player.name;
+            document.getElementById('modalRankText').textContent = rankDisplay || '#';
+            document.getElementById('modalPointsText').textContent = `${player.points || 0} points`;
             document.getElementById('modalTitleText').textContent = getTitleByPoints(player.points);
-            document.getElementById('modalRegionText').textContent = player.region || 'Europe';
-            document.getElementById('modalNameMCLink').href = `https://namemc.com/search?q=${player.name}`;
 
             const sortedKits = getSortedPlayerKits(player);
-            let modalTiersHtml = '';
+            let modalKitsHtml = '';
 
             sortedKits.forEach(item => {
                 const parsed = parseTierClass(item.tierVal);
-                modalTiersHtml += `
-                    <div class="tier-slot ${parsed.bgClass}" style="width: 70px; padding: 6px;">
-                        <span style="font-size: 9px; color: #a0a6b5; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${item.kitName}</span>
-                        <span class="tier-badge ${parsed.colorClass}">${item.tierVal.toUpperCase()}</span>
+                const icon = kitIcons[item.kitName] || '⚔️';
+                const hasTier = item.tierVal && item.tierVal !== '-';
+
+                modalKitsHtml += `
+                    <div class="profile-kit-item">
+                        <div class="profile-kit-icon" title="${item.kitName}">
+                            ${icon}
+                        </div>
+                        <div class="profile-tier-badge ${parsed.bgClass}">
+                            ${hasTier ? item.tierVal.toUpperCase() : '-'}
+                        </div>
                     </div>
                 `;
             });
 
-            document.getElementById('modalTiersBox').innerHTML = modalTiersHtml;
+            document.getElementById('modalKitsGrid').innerHTML = modalKitsHtml;
             playerModal.classList.add('active');
         }
 

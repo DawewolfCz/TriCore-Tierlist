@@ -133,7 +133,7 @@
             width: 100%;
         }
 
-        /* TABULKA (OVERALL) STYLY */
+       
         .table-header {
             display: flex;
             padding: 14px 20px;
@@ -268,7 +268,7 @@
             border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
-        /* KIT VIEWER (5 SLOUPCŮ) STYLY */
+      
         .tier-columns-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -505,7 +505,7 @@
         </div>
     </footer>
 
-    <!-- MODAL HRÁČE -->
+   
     <div class="modal-overlay" id="playerModal">
         <div class="modal-card">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -523,7 +523,7 @@
         </div>
     </div>
 
-    <!-- PRIVACY MODAL -->
+    
     <div class="modal-overlay" id="privacyModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('privacyModal')">&times;</button>
@@ -539,7 +539,7 @@
         </div>
     </div>
 
-    <!-- COOKIES MODAL -->
+   
     <div class="modal-overlay" id="cookiesModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('cookiesModal')">&times;</button>
@@ -636,7 +636,7 @@
             }
         }
 
-        // 1. ZOBRAZENÍ TABULKY PRO OVERALL
+        
         function renderOverallTable(filterText = '') {
             const container = document.getElementById('rankingContainer');
             let data = categoriesData.overall || [];
@@ -754,7 +754,7 @@
             `;
         }
 
-        // 2. ZOBRAZENÍ 5 SLOUPCŮ PRO KONKRÉTNÍ KIT
+       
         function renderKitColumns(kitName, filterText = '') {
             const container = document.getElementById('rankingContainer');
             let data = categoriesData.overall || [];

@@ -130,8 +130,10 @@
             overflow: hidden;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
             flex: 1;
+            width: 100%;
         }
 
+        /* TABULKA (OVERALL) STYLY */
         .table-header {
             display: flex;
             padding: 14px 20px;
@@ -266,6 +268,131 @@
             border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
+        /* KIT VIEWER (5 SLOUPCŮ) STYLY */
+        .tier-columns-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            padding: 15px;
+            background-color: #0b0c10;
+        }
+
+        .tier-column {
+            background-color: #141721;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .tier-column-header {
+            padding: 12px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background-color: #1a1f2c;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tier-column-header.t1-header { color: #fde047; border-bottom-color: #fde047; }
+        .tier-column-header.t2-header { color: #f1f5f9; border-bottom-color: #f1f5f9; }
+        .tier-column-header.t3-header { color: #fb923c; border-bottom-color: #fb923c; }
+        .tier-column-header.t4-header { color: #c084fc; border-bottom-color: #c084fc; }
+        .tier-column-header.t5-header { color: #94a3b8; border-bottom-color: #94a3b8; }
+
+        .tier-cards-list {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .player-kit-card {
+            background-color: #1c2130;
+            border: 1px solid #2a3147;
+            border-radius: 6px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .player-kit-card:hover {
+            transform: translateY(-2px);
+            background-color: #242b3e;
+            border-color: #4b5563;
+        }
+
+        .player-kit-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        /* HT (High Tier) - 2 šipky, zelený proužek */
+        .player-kit-card.ht-card::before {
+            background-color: #4ade80;
+        }
+        /* LT (Low Tier) - 1 šipka, modro-šedý proužek */
+        .player-kit-card.lt-card::before {
+            background-color: #3b82f6;
+        }
+
+        .kit-card-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kit-card-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+
+        .kit-card-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 110px;
+        }
+
+        .kit-card-arrows {
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .ht-card .kit-card-arrows {
+            color: #4ade80;
+        }
+
+        .lt-card .kit-card-arrows {
+            color: #3b82f6;
+        }
+
         footer {
             max-width: 1100px;
             width: 100%;
@@ -364,14 +491,7 @@
     </div>
 
     <div class="ranking-container" id="rankingContainer">
-        <div class="table-header">
-            <span style="width: 175px;">Player</span>
-            <span style="width: 250px;"></span>
-            <span style="width: 45px; text-align: center;">Region</span>
-            <span style="margin-left: auto;">Tiers</span>
-        </div>
-
-        <div id="tableBody"></div>
+        <!-- Zde se přes JS dinamicky generuje buď tabulka (Overall) nebo 5 sloupců (Kit view) -->
     </div>
 
     <footer>
@@ -385,6 +505,7 @@
         </div>
     </footer>
 
+    <!-- MODAL HRÁČE -->
     <div class="modal-overlay" id="playerModal">
         <div class="modal-card">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -402,6 +523,7 @@
         </div>
     </div>
 
+    <!-- PRIVACY MODAL -->
     <div class="modal-overlay" id="privacyModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('privacyModal')">&times;</button>
@@ -417,6 +539,7 @@
         </div>
     </div>
 
+    <!-- COOKIES MODAL -->
     <div class="modal-overlay" id="cookiesModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('cookiesModal')">&times;</button>
@@ -462,20 +585,24 @@
         }
 
         function parseTierClass(tierStr) {
-            if (!tierStr || tierStr === '-') return { colorClass: '', bgClass: '' };
+            if (!tierStr || tierStr === '-') return { colorClass: '', bgClass: '', isHT: false, tierNum: 0 };
             const lower = tierStr.toLowerCase();
             let numClass = 't5';
-            if (lower.includes('1')) numClass = 't1';
-            else if (lower.includes('2')) numClass = 't2';
-            else if (lower.includes('3')) numClass = 't3';
-            else if (lower.includes('4')) numClass = 't4';
-            else if (lower.includes('5')) numClass = 't5';
+            let tierNum = 5;
+
+            if (lower.includes('1')) { numClass = 't1'; tierNum = 1; }
+            else if (lower.includes('2')) { numClass = 't2'; tierNum = 2; }
+            else if (lower.includes('3')) { numClass = 't3'; tierNum = 3; }
+            else if (lower.includes('4')) { numClass = 't4'; tierNum = 4; }
+            else if (lower.includes('5')) { numClass = 't5'; tierNum = 5; }
 
             let bgClass = 'lt-bg';
+            let isHT = false;
             if (lower.startsWith('ht')) {
                 bgClass = 'ht-bg';
+                isHT = true;
             }
-            return { colorClass: numClass, bgClass: bgClass };
+            return { colorClass: numClass, bgClass: bgClass, isHT: isHT, tierNum: tierNum };
         }
 
         function getTitleByPoints(points) {
@@ -494,23 +621,25 @@
                 const playersArray = await response.json();
                 
                 categoriesData.overall = playersArray;
-                renderTable(currentCategory, document.getElementById('searchInput').value);
+                renderView(currentCategory, document.getElementById('searchInput').value);
             } catch (error) {
                 console.error("Chyba při načítání:", error);
-                document.getElementById('tableBody').innerHTML = '<div style="padding: 20px; text-align: center; color: #ff5252;">Nepodařilo se načíst data z databáze.</div>';
+                document.getElementById('rankingContainer').innerHTML = '<div style="padding: 20px; text-align: center; color: #ff5252;">Nepodařilo se načíst data z databáze.</div>';
             }
         }
 
-        function renderTable(categoryKey, filterText = '') {
-            const tableBody = document.getElementById('tableBody');
-            let data = categoriesData.overall || [];
-
-            if (categoryKey !== 'overall') {
-                data = data.filter(player => {
-                    const val = getPlayerTier(player, categoryKey);
-                    return val && val !== '-';
-                });
+        function renderView(categoryKey, filterText = '') {
+            if (categoryKey === 'overall') {
+                renderOverallTable(filterText);
+            } else {
+                renderKitColumns(categoryKey, filterText);
             }
+        }
+
+        // 1. ZOBRAZENÍ TABULKY PRO OVERALL
+        function renderOverallTable(filterText = '') {
+            const container = document.getElementById('rankingContainer');
+            let data = categoriesData.overall || [];
 
             const filteredData = data.filter(player => player.name.toLowerCase().includes(filterText.toLowerCase()));
 
@@ -549,7 +678,7 @@
                 }
             }
 
-            let html = '';
+            let rowsHtml = '';
 
             filteredData.forEach((player, index) => {
                 const rank = ranks[index];
@@ -569,43 +698,32 @@
                 else if (rank === 3 && !isRestricted && !isRetired) rankClass = 'rank-3';
 
                 let tiersHtml = '';
-
-                if (categoryKey === 'overall') {
-                    allKits.forEach(kitName => {
-                        const tierVal = getPlayerTier(player, kitName);
-                        const parsed = parseTierClass(tierVal);
-                        if (tierVal && tierVal !== '-') {
-                            tiersHtml += `
-                                <div class="tier-slot ${parsed.bgClass}">
-                                    <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
-                                    <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
-                                </div>
-                            `;
-                        } else {
-                            tiersHtml += `
-                                <div class="tier-slot" style="background: transparent; border: none;">
-                                    <span style="font-size: 9px; color: #555; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
-                                    <span class="tier-badge" style="color: #555;">-</span>
-                                </div>
-                            `;
-                        }
-                    });
-                } else {
-                    const tierVal = getPlayerTier(player, categoryKey);
+                allKits.forEach(kitName => {
+                    const tierVal = getPlayerTier(player, kitName);
                     const parsed = parseTierClass(tierVal);
-                    tiersHtml += `
-                        <div class="tier-slot ${parsed.bgClass}">
-                            <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${categoryKey === 'altarsmp' ? 'alt' : categoryKey.substring(0,3)}</span>
-                            <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
-                        </div>
-                    `;
-                }
+                    if (tierVal && tierVal !== '-') {
+                        tiersHtml += `
+                            <div class="tier-slot ${parsed.bgClass}">
+                                <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
+                                <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
+                            </div>
+                        `;
+                    } else {
+                        tiersHtml += `
+                            <div class="tier-slot" style="background: transparent; border: none;">
+                                <span style="font-size: 9px; color: #555; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
+                                <span class="tier-badge" style="color: #555;">-</span>
+                            </div>
+                        `;
+                    }
+                });
 
                 const playerTitle = getTitleByPoints(player.points);
                 const displayRank = isRetired ? `R${player.retiredTier || 'lt2+'}` : `${rank}.`;
+                const playerSafeJson = JSON.stringify(player).replace(/'/g, "&apos;");
 
-                html += `
-                    <div class="player-row ${rowClass}" onclick='openModal(${JSON.stringify(player)}, "${displayRank}")'>
+                rowsHtml += `
+                    <div class="player-row ${rowClass}" onclick='openModal(${playerSafeJson}, "${displayRank}")'>
                         <div class="rank-skin-box ${rankClass}">
                             <span class="player-rank-num">${displayRank}</span>
                             <img src="https://mc-heads.net/avatar/${player.name}/44" class="player-avatar-skin" alt="Skin">
@@ -625,7 +743,79 @@
                 `;
             });
 
-            tableBody.innerHTML = html || '<div style="padding: 20px; text-align: center; color: #a0a6b5;">Žádní hráči nenalezeni.</div>';
+            container.innerHTML = `
+                <div class="table-header">
+                    <span style="width: 175px;">Player</span>
+                    <span style="width: 250px;"></span>
+                    <span style="width: 45px; text-align: center;">Region</span>
+                    <span style="margin-left: auto;">Tiers</span>
+                </div>
+                <div id="tableBody">${rowsHtml || '<div style="padding: 20px; text-align: center; color: #a0a6b5;">Žádní hráči nenalezeni.</div>'}</div>
+            `;
+        }
+
+        // 2. ZOBRAZENÍ 5 SLOUPCŮ PRO KONKRÉTNÍ KIT
+        function renderKitColumns(kitName, filterText = '') {
+            const container = document.getElementById('rankingContainer');
+            let data = categoriesData.overall || [];
+
+            const filteredData = data.filter(player => player.name.toLowerCase().includes(filterText.toLowerCase()));
+
+            const tiersMap = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+
+            filteredData.forEach(player => {
+                const tierVal = getPlayerTier(player, kitName);
+                if (tierVal && tierVal !== '-') {
+                    const parsed = parseTierClass(tierVal);
+                    if (parsed.tierNum >= 1 && parsed.tierNum <= 5) {
+                        tiersMap[parsed.tierNum].push({
+                            player: player,
+                            tierVal: tierVal,
+                            isHT: parsed.isHT
+                        });
+                    }
+                }
+            });
+
+            let columnsHtml = '';
+
+            for (let t = 1; t <= 5; t++) {
+                let cardsHtml = '';
+
+                // HT Hráči nahoře, LT Hráči dole
+                tiersMap[t].sort((a, b) => (b.isHT === a.isHT) ? 0 : b.isHT ? 1 : -1);
+
+                tiersMap[t].forEach(item => {
+                    const p = item.player;
+                    const isHT = item.isHT;
+                    const playerSafeJson = JSON.stringify(p).replace(/'/g, "&apos;");
+
+                    cardsHtml += `
+                        <div class="player-kit-card ${isHT ? 'ht-card' : 'lt-card'}" onclick='openModal(${playerSafeJson}, "")'>
+                            <div class="kit-card-left">
+                                <img src="https://mc-heads.net/avatar/${p.name}/26" class="kit-card-avatar" alt="Skin">
+                                <span class="kit-card-name">${p.name}</span>
+                            </div>
+                            <div class="kit-card-arrows">
+                                ${isHT ? '⇞' : '↑'}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                columnsHtml += `
+                    <div class="tier-column">
+                        <div class="tier-column-header t${t}-header">
+                            🏆 Tier ${t}
+                        </div>
+                        <div class="tier-cards-list">
+                            ${cardsHtml || '<div style="padding: 10px; text-align: center; color: #555; font-size: 0.75rem;">Žádný hráč</div>'}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `<div class="tier-columns-grid">${columnsHtml}</div>`;
         }
 
         loadDataFromBot();
@@ -636,12 +826,12 @@
                 navItems.forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
                 currentCategory = item.dataset.category;
-                renderTable(currentCategory, document.getElementById('searchInput').value);
+                renderView(currentCategory, document.getElementById('searchInput').value);
             });
         });
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            renderTable(currentCategory, e.target.value);
+            renderView(currentCategory, e.target.value);
         });
 
         document.getElementById('jumpRestrictedBtn').addEventListener('click', () => {

@@ -133,7 +133,7 @@
             width: 100%;
         }
 
-       
+        
         .table-header {
             display: flex;
             padding: 14px 20px;
@@ -239,7 +239,7 @@
 
         .player-tiers {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-left: auto;
             align-items: center;
         }
@@ -248,7 +248,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 38px;
+            width: 40px;
             padding: 3px 0;
             border-radius: 4px;
         }
@@ -268,7 +268,7 @@
             border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
-      
+        
         .tier-columns-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -345,11 +345,9 @@
             width: 4px;
         }
 
-        /* HT (High Tier) - 2 šipky, zelený proužek */
         .player-kit-card.ht-card::before {
             background-color: #4ade80;
         }
-        /* LT (Low Tier) - 1 šipka, modro-šedý proužek */
         .player-kit-card.lt-card::before {
             background-color: #3b82f6;
         }
@@ -385,13 +383,8 @@
             line-height: 1;
         }
 
-        .ht-card .kit-card-arrows {
-            color: #4ade80;
-        }
-
-        .lt-card .kit-card-arrows {
-            color: #3b82f6;
-        }
+        .ht-card .kit-card-arrows { color: #4ade80; }
+        .lt-card .kit-card-arrows { color: #3b82f6; }
 
         footer {
             max-width: 1100px;
@@ -465,7 +458,7 @@
         .modal-namemc:hover { color: #fff; border-color: #4b5563; }
         .modal-tiers-box {
             width: 100%; background-color: #10131a; border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 12px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px;
+            border-radius: 8px; padding: 12px; display: flex; justify-content: flex-start; flex-wrap: wrap; gap: 8px;
         }
     </style>
 </head>
@@ -490,9 +483,7 @@
         <div class="nav-item" data-category="lt mace">LT Mace</div>
     </div>
 
-    <div class="ranking-container" id="rankingContainer">
-        <!-- Zde se přes JS dinamicky generuje buď tabulka (Overall) nebo 5 sloupců (Kit view) -->
-    </div>
+    <div class="ranking-container" id="rankingContainer"></div>
 
     <footer>
         <p>&copy; 2026 TriCore Tierlist. Všechna práva vyhrazena.</p>
@@ -505,7 +496,7 @@
         </div>
     </footer>
 
-   
+    
     <div class="modal-overlay" id="playerModal">
         <div class="modal-card">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -518,7 +509,7 @@
             
             <a href="#" target="_blank" class="modal-namemc" id="modalNameMCLink">🔗 NameMC</a>
 
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Tiers</div>
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Tiers (Sorted Best to Worst)</div>
             <div class="modal-tiers-box" id="modalTiersBox"></div>
         </div>
     </div>
@@ -539,7 +530,7 @@
         </div>
     </div>
 
-   
+    
     <div class="modal-overlay" id="cookiesModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('cookiesModal')">&times;</button>
@@ -563,6 +554,17 @@
             'lt mace'
         ];
 
+        // Mřížka váhy tierů pro řazení od NEJLEPŠÍHO (nejnižší číslo = nejlepší)
+        const tierWeights = {
+            'ht1': 1,  'lt1': 2,
+            'ht2': 3,  'lt2': 4,
+            'ht3': 5,  'lt3': 6,
+            'ht4': 7,  'lt4': 8,
+            'ht5': 9,  'lt5': 10,
+            't1': 2,   't2': 4, 't3': 6, 't4': 8, 't5': 10,
+            '-': 99
+        };
+
         let categoriesData = { overall: [] };
         let currentCategory = 'overall';
 
@@ -582,6 +584,28 @@
                 }
             }
             return '-';
+        }
+
+        function getTierWeight(tierStr) {
+            if (!tierStr || tierStr === '-') return 99;
+            const cleaned = tierStr.toLowerCase().trim();
+            return tierWeights[cleaned] || 98;
+        }
+
+        // Seřadí kity daného hráče od nejlepšího po nejhorší
+        function getSortedPlayerKits(player) {
+            const playerKits = allKits.map(kitName => {
+                const tierVal = getPlayerTier(player, kitName);
+                return {
+                    kitName: kitName,
+                    tierVal: tierVal,
+                    weight: getTierWeight(tierVal)
+                };
+            });
+
+            // Řazení od nejnižší váhy (1) po nejvyšší (99)
+            playerKits.sort((a, b) => a.weight - b.weight);
+            return playerKits;
         }
 
         function parseTierClass(tierStr) {
@@ -697,21 +721,23 @@
                 else if (rank === 2 && !isRestricted && !isRetired) rankClass = 'rank-2';
                 else if (rank === 3 && !isRestricted && !isRetired) rankClass = 'rank-3';
 
+                
+                const sortedKits = getSortedPlayerKits(player);
                 let tiersHtml = '';
-                allKits.forEach(kitName => {
-                    const tierVal = getPlayerTier(player, kitName);
-                    const parsed = parseTierClass(tierVal);
-                    if (tierVal && tierVal !== '-') {
+
+                sortedKits.forEach(item => {
+                    const parsed = parseTierClass(item.tierVal);
+                    if (item.tierVal && item.tierVal !== '-') {
                         tiersHtml += `
                             <div class="tier-slot ${parsed.bgClass}">
-                                <span style="font-size: 9px; color: #a0a6b5; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
-                                <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
+                                <span style="font-size: 8px; color: #a0a6b5; text-transform: uppercase;">${item.kitName === 'altarsmp' ? 'alt' : item.kitName.substring(0,3)}</span>
+                                <span class="tier-badge ${parsed.colorClass}">${item.tierVal.toUpperCase()}</span>
                             </div>
                         `;
                     } else {
                         tiersHtml += `
                             <div class="tier-slot" style="background: transparent; border: none;">
-                                <span style="font-size: 9px; color: #555; text-transform: uppercase;">${kitName === 'altarsmp' ? 'alt' : kitName.substring(0,3)}</span>
+                                <span style="font-size: 8px; color: #555; text-transform: uppercase;">${item.kitName === 'altarsmp' ? 'alt' : item.kitName.substring(0,3)}</span>
                                 <span class="tier-badge" style="color: #555;">-</span>
                             </div>
                         `;
@@ -748,13 +774,13 @@
                     <span style="width: 175px;">Player</span>
                     <span style="width: 250px;"></span>
                     <span style="width: 45px; text-align: center;">Region</span>
-                    <span style="margin-left: auto;">Tiers</span>
+                    <span style="margin-left: auto;">Tiers (Best First)</span>
                 </div>
                 <div id="tableBody">${rowsHtml || '<div style="padding: 20px; text-align: center; color: #a0a6b5;">Žádní hráči nenalezeni.</div>'}</div>
             `;
         }
 
-       
+      
         function renderKitColumns(kitName, filterText = '') {
             const container = document.getElementById('rankingContainer');
             let data = categoriesData.overall || [];
@@ -782,7 +808,6 @@
             for (let t = 1; t <= 5; t++) {
                 let cardsHtml = '';
 
-                // HT Hráči nahoře, LT Hráči dole
                 tiersMap[t].sort((a, b) => (b.isHT === a.isHT) ? 0 : b.isHT ? 1 : -1);
 
                 tiersMap[t].forEach(item => {
@@ -846,6 +871,7 @@
         const playerModal = document.getElementById('playerModal');
         const closeModalBtn = document.getElementById('closeModal');
 
+        
         function openModal(player, rankDisplay) {
             document.getElementById('modalAvatar').src = `https://mc-heads.net/avatar/${player.name}/75`;
             document.getElementById('modalUsername').textContent = player.name;
@@ -853,17 +879,19 @@
             document.getElementById('modalRegionText').textContent = player.region || 'Europe';
             document.getElementById('modalNameMCLink').href = `https://namemc.com/search?q=${player.name}`;
 
+            const sortedKits = getSortedPlayerKits(player);
             let modalTiersHtml = '';
-            allKits.forEach(kitName => {
-                const tierVal = getPlayerTier(player, kitName);
-                const parsed = parseTierClass(tierVal);
+
+            sortedKits.forEach(item => {
+                const parsed = parseTierClass(item.tierVal);
                 modalTiersHtml += `
-                    <div class="tier-slot ${parsed.bgClass}" style="width: 55px; padding: 6px;">
-                        <span style="font-size: 10px; color: #a0a6b5; text-align: center; margin-bottom: 2px;">${kitName}</span>
-                        <span class="tier-badge ${parsed.colorClass}">${tierVal.toUpperCase()}</span>
+                    <div class="tier-slot ${parsed.bgClass}" style="width: 70px; padding: 6px;">
+                        <span style="font-size: 9px; color: #a0a6b5; text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${item.kitName}</span>
+                        <span class="tier-badge ${parsed.colorClass}">${item.tierVal.toUpperCase()}</span>
                     </div>
                 `;
             });
+
             document.getElementById('modalTiersBox').innerHTML = modalTiersHtml;
             playerModal.classList.add('active');
         }

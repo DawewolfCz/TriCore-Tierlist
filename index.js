@@ -13,14 +13,14 @@ const {
 } = require('discord.js');
 const mongoose = require('mongoose');
 
-// --- 1. NASTAVENÍ EXPRESS SERVERU ---
+// --- 1. EXPRESS SERVER ---
 const app = express();
 app.use(express.json());
 
-// Servírování statických souborů webu (index.html ze složky public)
+// Poskytování statických souborů webu (předpokládá složku 'public' s index.html)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- 2. PRIROJENÍ K MONGO DB A SCHEMA ---
+// --- 2. MONGOOSE SCHEMA & MODEL ---
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
@@ -39,18 +39,18 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model('Player', playerSchema, 'players');
 
-// --- 3. API ENDPOINT PRO WEBOVOU STRÁNKU ---
+// --- 3. API ENDPOINT PRO WEB ---
 app.get('/api/players', async (req, res) => {
     try {
         const players = await Player.find({});
         res.json(players);
     } catch (error) {
-        console.error("Chyba při načítání hráčů:", error);
+        console.error("Chyba při načítání hráčů pro web:", error);
         res.status(500).json({ error: "Chyba při načítání dat" });
     }
 });
 
-// --- 4. POMOCNÉ FUNKCE PRO BODY A TITULY ---
+// --- 4. HELPER FUNKCE PRO BODY A TITULY ---
 function calculatePoints(tiersObj) {
     let totalPoints = 0;
     const tierValues = {
@@ -60,6 +60,8 @@ function calculatePoints(tiersObj) {
         "ht4": 15,  "lt4": 10,
         "ht5": 5,   "lt5": 2
     };
+
+    if (!tiersObj) return 0;
 
     for (const kit in tiersObj) {
         const val = tiersObj[kit] ? tiersObj[kit].toLowerCase().trim() : "";
@@ -92,7 +94,7 @@ client.on('ready', () => {
     console.log(`Discord bot je přihlášen jako ${client.user.tag}!`);
 });
 
-// Příkaz !setup na odeslání tlačítka do kanálu
+// Příkaz !setup pro vytvoření tlačítka v kanálu
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
@@ -111,7 +113,7 @@ client.on('messageCreate', async message => {
     }
 });
 
-// Zpracování kliknutí na tlačítko a odeslání modalu
+// Obsluha Tlačítka a Modalu
 client.on('interactionCreate', async interaction => {
     if (interaction.isButton()) {
         if (interaction.customId === 'set_minecraft_nick') {
@@ -139,52 +141,56 @@ client.on('interactionCreate', async interaction => {
             const isRestricted = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted') : false;
             const isRetired = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired') : false;
 
-            const existingPlayer = await Player.findOne({ name: { $regex: new RegExp(`^${mcNick}$`, 'i') } });
-            
-            const sampleTiers = existingPlayer && existingPlayer.tiers ? existingPlayer.tiers : {
-                "neth axe": "-",
-                "explosive diarrhea": "-",
-                "dia mace": "-",
-                "altarsmp": "-",
-                "poorsmp": "-",
-                "netherite berry": "-",
-                "drainpvp": "-",
-                "lt mace": "-"
-            };
-
-            const points = calculatePoints(sampleTiers);
-            const title = getTitleByPoints(points);
-
             try {
-                await Player.findOneAndUpdate(
-                    { name: existingPlayer ? existingPlayer.name : mcNick },
-                    {
-                        name: existingPlayer ? existingPlayer.name : mcNick,
+                // Najdeme hráče v databázi podle jména
+                let player = await Player.findOne({ name: { $regex: new RegExp(`^${mcNick}$`, 'i') } });
+
+                if (!player) {
+                    // Pokud hráč neexistuje, vytvoříme nový záznam s výchozími pomyslnými tiery
+                    player = new Player({
+                        name: mcNick,
                         region: "EU",
-                        points: points,
-                        title: title,
-                        isRestricted: isRestricted,
-                        isRetired: isRetired,
-                        tiers: sampleTiers
-                    },
-                    { upsert: true, new: true }
-                );
+                        tiers: {
+                            "neth axe": "-",
+                            "explosive diarrhea": "-",
+                            "dia mace": "-",
+                            "altarsmp": "-",
+                            "poorsmp": "-",
+                            "netherite berry": "-",
+                            "drainpvp": "-",
+                            "lt mace": "-"
+                        }
+                    });
+                }
+
+                // Aktualizujeme stav rolí
+                player.isRestricted = isRestricted;
+                player.isRetired = isRetired;
+
+                // Přepočítáme body a titul přímo z aktuálních tierů v DB
+                player.points = calculatePoints(player.tiers);
+                player.title = getTitleByPoints(player.points);
+
+                // Důležité: Mongoose potřebuje vědět, že se měnil vnořený objekt nebo že ho ukládáme
+                player.markModified('tiers');
+                await player.save();
 
                 await interaction.reply({ 
-                    content: `Úspěšně zaregistrován Minecraft nick **${mcNick}**! (Body: ${points}, Restricted: ${isRestricted})`, 
+                    content: `Úspěšně zaregistrován/synchronizován nick **${player.name}**! (Body: ${player.points}, Title: ${player.title})`, 
                     ephemeral: true 
                 });
+
             } catch (err) {
-                console.error(err);
+                console.error("Chyba při ukládání hráče:", err);
                 await interaction.reply({ content: "Chyba při ukládání nicku do databáze.", ephemeral: true });
             }
         }
     }
 });
 
-// --- 6. SPUŠTĚNÍ SERVERU A BOTA ---
+// --- 6. SPUŠTĚNÍ APPky ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Webový server běží na portu ${PORT}`);
+    console.log(`Server běží na portu ${PORT}`);
     client.login(process.env.DISCORD_TOKEN);
 });

@@ -17,7 +17,6 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 
-// Poskytování statických souborů webu (předpokládá složku 'public' s index.html)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- 2. MONGOOSE SCHEMA & MODEL ---
@@ -38,6 +37,18 @@ const playerSchema = new mongoose.Schema({
 });
 
 const Player = mongoose.model('Player', playerSchema, 'players');
+
+// Defaultní struktura kitů
+const DEFAULT_TIERS = {
+    "neth axe": "-",
+    "explosive diarrhea": "-",
+    "dia mace": "-",
+    "altarsmp": "-",
+    "poorsmp": "-",
+    "netherite berry": "-",
+    "drainpvp": "-",
+    "lt mace": "-"
+};
 
 // --- 3. API ENDPOINT PRO WEB ---
 app.get('/api/players', async (req, res) => {
@@ -64,7 +75,7 @@ function calculatePoints(tiersObj) {
     if (!tiersObj) return 0;
 
     for (const kit in tiersObj) {
-        const val = tiersObj[kit] ? tiersObj[kit].toLowerCase().trim() : "";
+        const val = tiersObj[kit] ? tiersObj[kit].toString().toLowerCase().trim() : "";
         if (tierValues[val]) {
             totalPoints += tierValues[val];
         }
@@ -94,10 +105,11 @@ client.on('ready', () => {
     console.log(`Discord bot je přihlášen jako ${client.user.tag}!`);
 });
 
-// Příkaz !setup pro vytvoření tlačítka v kanálu
+// Zpracování zpráv/příkazů
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
+    // Příkaz !setup pro vytvoření tlačítka
     if (message.content === '!setup') {
         const button = new ButtonBuilder()
             .setCustomId('set_minecraft_nick')
@@ -111,9 +123,52 @@ client.on('messageCreate', async message => {
             components: [row]
         });
     }
+
+    // Příkaz na ruční nastavení tieru: !settier <Nick> <Kit> <Tier>
+    // Příklad: !settier NickName "neth axe" ht1
+    if (message.content.startsWith('!settier')) {
+        const args = message.content.slice(8).trim().match(/(?:[^\s"]+|"[^"]*")+/g);
+        
+        if (!args || args.length < 3) {
+            return message.reply('Použití: `!settier <Nick> "<Kit>" <Tier>`\nPříklad: `!settier Player1 "neth axe" ht1`');
+        }
+
+        const nick = args[0].replace(/"/g, '').trim();
+        const kit = args[1].replace(/"/g, '').toLowerCase().trim();
+        const tier = args[2].replace(/"/g, '').toLowerCase().trim();
+
+        try {
+            let player = await Player.findOne({ name: { $regex: new RegExp(`^${nick}$`, 'i') } });
+
+            if (!player) {
+                player = new Player({
+                    name: nick,
+                    region: "EU",
+                    tiers: { ...DEFAULT_TIERS }
+                });
+            }
+
+            // Vytvoříme kopii objektu
+            const updatedTiers = { ...player.tiers };
+            updatedTiers[kit] = tier;
+
+            player.tiers = updatedTiers;
+            player.markModified('tiers');
+
+            player.points = calculatePoints(player.tiers);
+            player.title = getTitleByPoints(player.points);
+
+            await player.save();
+
+            message.reply(`Úspěšně nastaven **${kit}** na **${tier}** pro **${player.name}**. Body: **${player.points}** (${player.title})`);
+        } catch (err) {
+            console.error(err);
+            message.reply('Chyba při ukládání do databáze.');
+        }
+    }
 });
 
-// Obsluha Tlačítka a Modalu
+// Zpracování tlačítka a modalu
 client.on('interactionCreate', async interaction => {
     if (interaction.isButton()) {
         if (interaction.customId === 'set_minecraft_nick') {
@@ -142,46 +197,32 @@ client.on('interactionCreate', async interaction => {
             const isRetired = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired') : false;
 
             try {
-                // Najdeme hráče v databázi podle jména
                 let player = await Player.findOne({ name: { $regex: new RegExp(`^${mcNick}$`, 'i') } });
 
                 if (!player) {
-                    // Pokud hráč neexistuje, vytvoříme nový záznam s výchozími pomyslnými tiery
                     player = new Player({
                         name: mcNick,
                         region: "EU",
-                        tiers: {
-                            "neth axe": "-",
-                            "explosive diarrhea": "-",
-                            "dia mace": "-",
-                            "altarsmp": "-",
-                            "poorsmp": "-",
-                            "netherite berry": "-",
-                            "drainpvp": "-",
-                            "lt mace": "-"
-                        }
+                        tiers: { ...DEFAULT_TIERS }
                     });
                 }
 
-                // Aktualizujeme stav rolí
                 player.isRestricted = isRestricted;
                 player.isRetired = isRetired;
 
-                // Přepočítáme body a titul přímo z aktuálních tierů v DB
                 player.points = calculatePoints(player.tiers);
                 player.title = getTitleByPoints(player.points);
 
-                // Důležité: Mongoose potřebuje vědět, že se měnil vnořený objekt nebo že ho ukládáme
                 player.markModified('tiers');
                 await player.save();
 
                 await interaction.reply({ 
-                    content: `Úspěšně zaregistrován/synchronizován nick **${player.name}**! (Body: ${player.points}, Title: ${player.title})`, 
+                    content: `Úspěšně synchronizován nick **${player.name}**! (Body: ${player.points}, Title: ${player.title})`, 
                     ephemeral: true 
                 });
 
             } catch (err) {
-                console.error("Chyba při ukládání hráče:", err);
+                console.error("Chyba při ukládání z Discordu:", err);
                 await interaction.reply({ content: "Chyba při ukládání nicku do databáze.", ephemeral: true });
             }
         }

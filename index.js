@@ -1,7 +1,26 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const express = require('express');
+const path = require('path');
+const { 
+    Client, 
+    GatewayIntentBits, 
+    ModalBuilder, 
+    TextInputBuilder, 
+    TextInputStyle, 
+    ActionRowBuilder, 
+    ButtonBuilder, 
+    ButtonStyle 
+} = require('discord.js');
 const mongoose = require('mongoose');
 
+// --- 1. NASTAVENÍ EXPRESS SERVERU ---
+const app = express();
+app.use(express.json());
+
+// Servírování statických souborů webu (index.html ze složky public)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// --- 2. PRIROJENÍ K MONGO DB A SCHEMA ---
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
@@ -20,15 +39,18 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model('Player', playerSchema, 'players');
 
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
+// --- 3. API ENDPOINT PRO WEBOVOU STRÁNKU ---
+app.get('/api/players', async (req, res) => {
+    try {
+        const players = await Player.find({});
+        res.json(players);
+    } catch (error) {
+        console.error("Chyba při načítání hráčů:", error);
+        res.status(500).json({ error: "Chyba při načítání dat" });
+    }
 });
 
+// --- 4. POMOCNÉ FUNKCE PRO BODY A TITULY ---
 function calculatePoints(tiersObj) {
     let totalPoints = 0;
     const tierValues = {
@@ -56,10 +78,21 @@ function getTitleByPoints(points) {
     return "Combat Member";
 }
 
+// --- 5. DISCORD BOT ---
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+
 client.on('ready', () => {
     console.log(`Discord bot je přihlášen jako ${client.user.tag}!`);
 });
 
+// Příkaz !setup na odeslání tlačítka do kanálu
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
@@ -78,6 +111,7 @@ client.on('messageCreate', async message => {
     }
 });
 
+// Zpracování kliknutí na tlačítko a odeslání modalu
 client.on('interactionCreate', async interaction => {
     if (interaction.isButton()) {
         if (interaction.customId === 'set_minecraft_nick') {
@@ -102,8 +136,8 @@ client.on('interactionCreate', async interaction => {
             const mcNick = interaction.fields.getTextInputValue('nick_input').trim();
             const targetMember = interaction.member;
 
-            const isRestricted = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted');
-            const isRetired = targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired');
+            const isRestricted = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted') : false;
+            const isRetired = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired') : false;
 
             const existingPlayer = await Player.findOne({ name: { $regex: new RegExp(`^${mcNick}$`, 'i') } });
             
@@ -148,4 +182,9 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+// --- 6. SPUŠTĚNÍ SERVERU A BOTA ---
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Webový server běží na portu ${PORT}`);
+    client.login(process.env.DISCORD_TOKEN);
+});

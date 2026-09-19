@@ -5,7 +5,6 @@ const app = express();
 
 const port = process.env.PORT || 10000;
 
-
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -38,18 +37,18 @@ app.get('/api/players', async (req, res) => {
     try {
         const players = await Player.find({});
         console.log("Found players in DB:", players.length); 
+        // FIXED: Send the players array back to the client
+        res.json(players);
     } catch (err) {
         console.error("DB Error:", err);
         res.status(500).json({ error: err.message });
     }
 });
 
-app.get('/*splat', (req, res) => {
+app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is running on port ${port}`);});
-
-
+    console.log(`Server is running on port ${port}`);
 });

@@ -44,8 +44,7 @@ app.get('/api/players', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-app.get('/*', (req, res) => {
+app.get('/*splat', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 

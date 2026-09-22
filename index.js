@@ -66,11 +66,11 @@ app.get('/api/players', async (req, res) => {
 function calculatePoints(tiersObj) {
     let totalPoints = 0;
     const tierValues = {
-        "ht1": 100, "lt1": 80,
-        "ht2": 65,  "lt2": 50,
-        "ht3": 35,  "lt3": 25,
-        "ht4": 15,  "lt4": 10,
-        "ht5": 5,   "lt5": 2
+        "ht1": 60, "lt1": 48,
+        "ht2": 32,  "lt2": 24,
+        "ht3": 16,  "lt3": 10,
+        "ht4": 5,  "lt4": 3,
+        "ht5": 2,   "lt5": 1
     };
 
     if (!tiersObj) return 0;
@@ -85,9 +85,9 @@ function calculatePoints(tiersObj) {
 }
 
 function getTitleByPoints(points) {
-    if (points >= 500) return "Combat Legend";
-    if (points >= 300) return "Combat Master";
-    if (points >= 150) return "Combat Veteran";
+    if (points >= 350) return "Combat Legend";
+    if (points >= 200) return "Combat Master";
+    if (points >= 100) return "Combat Veteran";
     if (points >= 50) return "Combat Warrior";
     return "Combat Member";
 }

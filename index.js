@@ -16,7 +16,6 @@ const mongoose = require('mongoose');
 // --- 1. EXPRESS SERVER ---
 const app = express();
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- 2. MONGOOSE SCHEMA & MODEL ---
@@ -38,17 +37,17 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model('Player', playerSchema, 'players');
 
-// Defaultní struktura kitů
-const DEFAULT_TIERS = {
-    "neth axe": "-",
-    "explosive diarrhea": "-",
-    "dia mace": "-",
-    "altarsmp": "-",
-    "poorsmp": "-",
-    "netherite berry": "-",
-    "drainpvp": "-",
-    "lt mace": "-"
-};
+// Seznam sledovaných kitů na webu
+const KITS = [
+    "neth axe",
+    "explosive diarrhea",
+    "dia mace",
+    "altarsmp",
+    "poorsmp",
+    "netherite berry",
+    "drainpvp",
+    "lt mace"
+];
 
 // --- 3. API ENDPOINT PRO WEB ---
 app.get('/api/players', async (req, res) => {
@@ -61,7 +60,9 @@ app.get('/api/players', async (req, res) => {
     }
 });
 
-// --- 4. HELPER FUNKCE PRO BODY A TITULY ---
+// --- 4. POMOCNÉ FUNKCE ---
+
+// Výpočet bodů
 function calculatePoints(tiersObj) {
     let totalPoints = 0;
     const tierValues = {
@@ -91,6 +92,41 @@ function getTitleByPoints(points) {
     return "Combat Member";
 }
 
+// Funkce, která přečte role uživatele a zistí z nich tiery
+function getTiersFromRoles(member) {
+    const detectedTiers = {
+        "neth axe": "-",
+        "explosive diarrhea": "-",
+        "dia mace": "-",
+        "altarsmp": "-",
+        "poorsmp": "-",
+        "netherite berry": "-",
+        "drainpvp": "-",
+        "lt mace": "-"
+    };
+
+    if (!member || !member.roles) return detectedTiers;
+
+    const validTiers = ["ht1", "lt1", "ht2", "lt2", "ht3", "lt3", "ht4", "lt4", "ht5", "lt5"];
+
+    // Projít všechny role uživatele na Discordu
+    member.roles.cache.forEach(role => {
+        const roleName = role.name.toLowerCase();
+
+        KITS.forEach(kit => {
+            if (roleName.includes(kit)) {
+                // Najdeme, jaký tier (např. ht1, lt2) je v názvu role
+                const foundTier = validTiers.find(t => roleName.includes(t));
+                if (foundTier) {
+                    detectedTiers[kit] = foundTier.toUpperCase();
+                }
+            }
+        });
+    });
+
+    return detectedTiers;
+}
+
 // --- 5. DISCORD BOT ---
 const client = new Client({
     intents: [
@@ -105,11 +141,9 @@ client.on('ready', () => {
     console.log(`Discord bot je přihlášen jako ${client.user.tag}!`);
 });
 
-// Zpracování zpráv/příkazů
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
-    // Příkaz !setup pro vytvoření tlačítka
     if (message.content === '!setup') {
         const button = new ButtonBuilder()
             .setCustomId('set_minecraft_nick')
@@ -119,52 +153,9 @@ client.on('messageCreate', async message => {
         const row = new ActionRowBuilder().addComponents(button);
 
         await message.channel.send({
-            content: 'Kliknutím na tlačítko níže si můžeš zaregistrovat nebo aktualizovat svůj Minecraft nick:',
+            content: 'Kliknutím na tlačítko níže si zaregistruješ svúj Minecraft nick a načtou se ti role z Discordu na web:',
             components: [row]
         });
-    }
-
-    // Příkaz na ruční nastavení tieru: !settier <Nick> <Kit> <Tier>
-    // Příklad: !settier NickName "neth axe" ht1
-    if (message.content.startsWith('!settier')) {
-        const args = message.content.slice(8).trim().match(/(?:[^\s"]+|"[^"]*")+/g);
-        
-        if (!args || args.length < 3) {
-            return message.reply('Použití: `!settier <Nick> "<Kit>" <Tier>`\nPříklad: `!settier Player1 "neth axe" ht1`');
-        }
-
-        const nick = args[0].replace(/"/g, '').trim();
-        const kit = args[1].replace(/"/g, '').toLowerCase().trim();
-        const tier = args[2].replace(/"/g, '').toLowerCase().trim();
-
-        try {
-            let player = await Player.findOne({ name: { $regex: new RegExp(`^${nick}$`, 'i') } });
-
-            if (!player) {
-                player = new Player({
-                    name: nick,
-                    region: "EU",
-                    tiers: { ...DEFAULT_TIERS }
-                });
-            }
-
-            // Vytvoříme kopii objektu
-            const updatedTiers = { ...player.tiers };
-            updatedTiers[kit] = tier;
-
-            player.tiers = updatedTiers;
-            player.markModified('tiers');
-
-            player.points = calculatePoints(player.tiers);
-            player.title = getTitleByPoints(player.points);
-
-            await player.save();
-
-            message.reply(`Úspěšně nastaven **${kit}** na **${tier}** pro **${player.name}**. Body: **${player.points}** (${player.title})`);
-        } catch (err) {
-            console.error(err);
-            message.reply('Chyba při ukládání do databáze.');
-        }
     }
 });
 
@@ -196,19 +187,20 @@ client.on('interactionCreate', async interaction => {
             const isRestricted = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted') : false;
             const isRetired = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired') : false;
 
+            // Načtení tierů z rolí
+            const tiersFromRoles = getTiersFromRoles(targetMember);
+
             try {
                 let player = await Player.findOne({ name: { $regex: new RegExp(`^${mcNick}$`, 'i') } });
 
                 if (!player) {
-                    player = new Player({
-                        name: mcNick,
-                        region: "EU",
-                        tiers: { ...DEFAULT_TIERS }
-                    });
+                    player = new Player({ name: mcNick });
                 }
 
+                player.region = "EU";
                 player.isRestricted = isRestricted;
                 player.isRetired = isRetired;
+                player.tiers = tiersFromRoles; // Uložíme rovnou tiery načtené z rolí
 
                 player.points = calculatePoints(player.tiers);
                 player.title = getTitleByPoints(player.points);
@@ -217,7 +209,7 @@ client.on('interactionCreate', async interaction => {
                 await player.save();
 
                 await interaction.reply({ 
-                    content: `Úspěšně synchronizován nick **${player.name}**! (Body: ${player.points}, Title: ${player.title})`, 
+                    content: `Úspěšně synchronizováno! Načteny role pro nick **${player.name}**. Body: **${player.points}** (${player.title}).`, 
                     ephemeral: true 
                 });
 
@@ -229,7 +221,7 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-// --- 6. SPUŠTĚNÍ APPky ---
+// --- 6. SPUŠTĚNÍ ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server běží na portu ${PORT}`);

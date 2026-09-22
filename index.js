@@ -92,7 +92,6 @@ function getTitleByPoints(points) {
     return "Combat Member";
 }
 
-// Funkce, která přečte role uživatele a zistí z nich tiery
 function getTiersFromRoles(member) {
     const detectedTiers = {
         "neth axe": "-",
@@ -104,6 +103,28 @@ function getTiersFromRoles(member) {
         "drainpvp": "-",
         "lt mace": "-"
     };
+
+    if (!member || !member.roles) return detectedTiers;
+
+    // Projdeme všechny role uživatele
+    member.roles.cache.forEach(role => {
+        const roleName = role.name.toLowerCase().trim();
+
+        // Pokud role obsahuje pomlčku (např. "altarsmp-lt3")
+        if (roleName.includes('-')) {
+            const parts = roleName.split('-');
+            const kitName = parts[0].trim(); // Název kitu před pomlčkou
+            const tierValue = parts[1].trim(); // Tier za pomlčkou
+
+            // Zkontrolujeme, zda tento kit máme v seznamu
+            if (detectedTiers.hasOwnProperty(kitName)) {
+                detectedTiers[kitName] = tierValue.toUpperCase();
+            }
+        }
+    });
+
+    return detectedTiers;
+}
 
     if (!member || !member.roles) return detectedTiers;
 

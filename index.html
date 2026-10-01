@@ -45,6 +45,7 @@
             display: flex;
             justify-content: center;
             gap: 10px;
+            width: 100%;
         }
 
         .search-input {
@@ -90,6 +91,7 @@
             overflow-x: auto;
             padding-bottom: 5px;
             justify-content: center;
+            width: 100%;
         }
 
         .nav-item {
@@ -215,30 +217,28 @@
 
         .player-name {
             font-weight: 700;
-            font-size: 0.95rem;
-            color: #ffffff;
+            font-size: 1.05rem;
+            color: #fff;
         }
 
         .player-title {
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: 2px;
+            font-weight: 500;
         }
 
         .player-region {
-            width: 45px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-align: center;
-            padding: 4px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
-            text-transform: uppercase;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #1e2333;
+            color: #a0a6b5;
         }
-        .region-eu { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
 
         .player-tiers {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             margin-left: auto;
             align-items: center;
         }
@@ -247,117 +247,79 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
         }
 
         .tier-icon-circle {
-            width: 30px;
-            height: 30px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: #181c28;
             border: 1px solid #2a3147;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.95rem;
+            font-size: 0.8rem;
         }
 
         .tier-badge-pill {
             padding: 2px 6px;
-            border-radius: 6px;
-            font-size: 0.7rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
             font-weight: 800;
-            min-width: 28px;
             text-align: center;
-            text-transform: uppercase;
+            min-width: 28px;
         }
 
-        .badge-ht { background-color: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.4); }
-        .badge-lt { background-color: rgba(147, 51, 234, 0.2); color: #c084fc; border: 1px solid rgba(147, 51, 234, 0.4); }
-        .badge-lt3 { background-color: rgba(251, 146, 60, 0.2) !important; color: #fb923c !important; border: 1px solid rgba(251, 146, 60, 0.4) !important; }
-        .badge-none { background-color: rgba(255, 255, 255, 0.05); color: #555; border: 1px solid transparent; }
+        .badge-none { background: #1c202e; color: #555; }
+        .badge-lt { background: #252a3a; color: #a0a6b5; }
+        .badge-lt3 { background: #1e3a8a; color: #60a5fa; }
+        .badge-ht { background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; }
 
+        /* Kit sloupce grid */
         .tier-columns-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 12px;
             padding: 15px;
-            background-color: #0b0c10;
         }
 
         .tier-column {
-            background-color: #141721;
-            border: 1px solid var(--border-color);
+            background: #10131a;
             border-radius: 8px;
-            display: flex;
-            flex-direction: column;
+            border: 1px solid var(--border-color);
             overflow: hidden;
-            min-height: 400px;
         }
 
         .tier-column-header {
-            padding: 12px;
-            text-align: center;
+            padding: 10px;
             font-weight: 800;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background-color: #1a1f2c;
-            border-bottom: 2px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            font-size: 0.85rem;
+            text-align: center;
+            background: #181c28;
+            border-bottom: 1px solid var(--border-color);
         }
-
-        .tier-column-header.t1-header { color: #fde047; border-bottom-color: #fde047; }
-        .tier-column-header.t2-header { color: #f1f5f9; border-bottom-color: #f1f5f9; }
-        .tier-column-header.t3-header { color: #fb923c; border-bottom-color: #fb923c; }
-        .tier-column-header.t4-header { color: #c084fc; border-bottom-color: #c084fc; }
-        .tier-column-header.t5-header { color: #94a3b8; border-bottom-color: #94a3b8; }
 
         .tier-cards-list {
             padding: 8px;
             display: flex;
             flex-direction: column;
             gap: 6px;
-            overflow-y: auto;
         }
 
         .player-kit-card {
-            background-color: #1c2130;
-            border: 1px solid #2a3147;
-            border-radius: 6px;
-            padding: 6px 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: #181c28;
+            border: 1px solid #252a3a;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.15s ease, background 0.15s ease;
         }
 
         .player-kit-card:hover {
-            transform: translateY(-2px);
-            background-color: #242b3e;
             border-color: #4b5563;
-        }
-
-        .player-kit-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-        }
-
-        .player-kit-card.ht-card::before {
-            background-color: #4ade80;
-        }
-        .player-kit-card.lt-card::before {
-            background-color: #3b82f6;
         }
 
         .kit-card-left {
@@ -367,133 +329,103 @@
         }
 
         .kit-card-avatar {
-            width: 26px;
-            height: 26px;
-            border-radius: 4px;
-            object-fit: contain;
+            width: 22px;
+            height: 22px;
+            border-radius: 3px;
         }
 
         .kit-card-name {
+            font-size: 0.8rem;
             font-weight: 600;
-            font-size: 0.85rem;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 110px;
         }
 
         .kit-card-arrows {
+            font-size: 0.85rem;
             font-weight: 800;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            line-height: 1;
         }
 
-        .ht-card .kit-card-arrows { color: #4ade80; }
+        .ht-card .kit-card-arrows { color: #f43f5e; }
         .lt-card .kit-card-arrows { color: #3b82f6; }
 
-        footer {
-            max-width: 1100px;
-            width: 100%;
-            margin: 40px auto 10px auto;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-        }
-
-        footer .links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 10px;
-        }
-
-        footer .links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        footer .links a:hover {
-            color: var(--text-main);
-        }
-
+        /* Modaly */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: rgba(0, 0, 0, 0.75);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
         }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
         .modal-card {
-            background-color: #12141d;
-            border: 1px solid #232838;
-            border-radius: 20px;
-            width: 440px;
-            padding: 25px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            transform: scale(0.92);
-            transition: transform 0.2s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
-        .modal-overlay.active .modal-card { transform: scale(1); }
-        
-        .modal-close {
-            position: absolute; top: 15px; right: 15px; background: #1c202e;
-            border: none; color: var(--text-muted); width: 32px; height: 32px;
-            border-radius: 50%; font-size: 1rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .modal-close:hover { color: #fff; background: #2a3147; }
 
-        .modal-avatar-container {
-            width: 80px; height: 80px; border-radius: 18px;
-            background: #1c202e; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 12px; overflow: hidden; border: 1px solid #2d3448;
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
         }
-        .modal-avatar-container img { width: 68px; height: 68px; object-fit: contain; }
-        
-        .modal-username { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; color: #fff; letter-spacing: 0.5px; }
-        
+
+        .modal-close:hover { color: #fff; }
+
+        .modal-avatar-container img {
+            width: 68px;
+            height: 68px;
+            border-radius: 8px;
+        }
+
+        .modal-username {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin: 10px 0 5px 0;
+        }
+
         .modal-stats-bar {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            background: #181c28;
-            padding: 6px 14px;
-            border-radius: 10px;
-            border: 1px solid #232838;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .modal-rank-badge {
-            background-color: #272d3f;
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.9rem;
             font-weight: 800;
+            color: #ffaa00;
         }
 
         .modal-points-text {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #fff;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         .modal-title-tag {
-            font-size: 0.95rem;
+            background: #252a3a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
             font-weight: 700;
-            color: #8b5cf6;
         }
 
         .modal-kits-grid {
@@ -524,6 +456,30 @@
             align-items: center;
             justify-content: center;
             font-size: 1.1rem;
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 30px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer .links {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        footer .links a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        footer .links a:hover {
+            color: #fff;
         }
     </style>
 </head>

@@ -27,6 +27,7 @@ mongoose.connect(MONGO_URI)
 
 const playerSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
+    discordId: { type: String, default: null }, // Přidáno pro automatickou aktualizaci podle ID
     region: { type: String, default: "EU" },
     points: { type: Number, default: 0 },
     title: { type: String, default: "Combat Member" },
@@ -67,10 +68,10 @@ function calculatePoints(tiersObj) {
     let totalPoints = 0;
     const tierValues = {
         "ht1": 60, "lt1": 48,
-        "ht2": 32,  "lt2": 24,
-        "ht3": 16,  "lt3": 10,
+        "ht2": 32, "lt2": 24,
+        "ht3": 16, "lt3": 10,
         "ht4": 5,  "lt4": 3,
-        "ht5": 2,   "lt5": 1
+        "ht5": 2,  "lt5": 1
     };
 
     if (!tiersObj) return 0;
@@ -92,6 +93,7 @@ function getTitleByPoints(points) {
     return "Combat Member";
 }
 
+// Vytažení tierů z rolí uživatele
 function getTiersFromRoles(member) {
     const detectedTiers = {
         "neth axe": "-",
@@ -106,43 +108,31 @@ function getTiersFromRoles(member) {
 
     if (!member || !member.roles) return detectedTiers;
 
-    // Projdeme všechny role uživatele
+    const validTiers = ["ht1", "lt1", "ht2", "lt2", "ht3", "lt3", "ht4", "lt4", "ht5", "lt5"];
+
     member.roles.cache.forEach(role => {
         const roleName = role.name.toLowerCase().trim();
 
-        // Pokud role obsahuje pomlčku (např. "altarsmp-lt3")
+        // Podpora pro formát: "altarsmp-lt3"
         if (roleName.includes('-')) {
             const parts = roleName.split('-');
-            const kitName = parts[0].trim(); // Název kitu před pomlčkou
-            const tierValue = parts[1].trim(); // Tier za pomlčkou
+            const kitName = parts[0].trim();
+            const tierValue = parts[1].trim();
 
-            // Zkontrolujeme, zda tento kit máme v seznamu
             if (detectedTiers.hasOwnProperty(kitName)) {
                 detectedTiers[kitName] = tierValue.toUpperCase();
             }
-        }
-    });
-
-    return detectedTiers;
-}
-
-    if (!member || !member.roles) return detectedTiers;
-
-    const validTiers = ["ht1", "lt1", "ht2", "lt2", "ht3", "lt3", "ht4", "lt4", "ht5", "lt5"];
-
-    // Projít všechny role uživatele na Discordu
-    member.roles.cache.forEach(role => {
-        const roleName = role.name.toLowerCase();
-
-        KITS.forEach(kit => {
-            if (roleName.includes(kit)) {
-                // Najdeme, jaký tier (např. ht1, lt2) je v názvu role
-                const foundTier = validTiers.find(t => roleName.includes(t));
-                if (foundTier) {
-                    detectedTiers[kit] = foundTier.toUpperCase();
+        } else {
+            // Podpora pro formát: "Neth Axe HT1" nebo "Altarsmp LT2"
+            KITS.forEach(kit => {
+                if (roleName.includes(kit)) {
+                    const foundTier = validTiers.find(t => roleName.includes(t));
+                    if (foundTier) {
+                        detectedTiers[kit] = foundTier.toUpperCase();
+                    }
                 }
-            }
-        });
+            });
+        }
     });
 
     return detectedTiers;
@@ -152,7 +142,7 @@ function getTiersFromRoles(member) {
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMembers, // Zásadní pro sledování rolí
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
     ]
@@ -174,13 +164,13 @@ client.on('messageCreate', async message => {
         const row = new ActionRowBuilder().addComponents(button);
 
         await message.channel.send({
-            content: 'Kliknutím na tlačítko níže si zaregistruješ svúj Minecraft nick a načtou se ti role z Discordu na web:',
+            content: 'Kliknutím na tlačítko níže si zaregistruješ svůj Minecraft nick a načtou se ti role z Discordu na web:',
             components: [row]
         });
     }
 });
 
-// Zpracování tlačítka a modalu
+// Zpracování tlačítka a modalu (Registrace)
 client.on('interactionCreate', async interaction => {
     if (interaction.isButton()) {
         if (interaction.customId === 'set_minecraft_nick') {
@@ -208,7 +198,6 @@ client.on('interactionCreate', async interaction => {
             const isRestricted = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted') : false;
             const isRetired = targetMember ? targetMember.roles.cache.some(role => role.name.toLowerCase() === 'retired') : false;
 
-            // Načtení tierů z rolí
             const tiersFromRoles = getTiersFromRoles(targetMember);
 
             try {
@@ -218,10 +207,12 @@ client.on('interactionCreate', async interaction => {
                     player = new Player({ name: mcNick });
                 }
 
+                // Uložíme ID z Discordu pro budoucí automatické aktualizace
+                player.discordId = targetMember.id;
                 player.region = "EU";
                 player.isRestricted = isRestricted;
                 player.isRetired = isRetired;
-                player.tiers = tiersFromRoles; // Uložíme rovnou tiery načtené z rolí
+                player.tiers = tiersFromRoles;
 
                 player.points = calculatePoints(player.tiers);
                 player.title = getTitleByPoints(player.points);
@@ -230,7 +221,7 @@ client.on('interactionCreate', async interaction => {
                 await player.save();
 
                 await interaction.reply({ 
-                    content: `Úspěšně synchronizováno! Načteny role pro nick **${player.name}**. Body: **${player.points}** (${player.title}).`, 
+                    content: `Úspěšně synchronizováno! Propojeno s Discord účtem. Načteny role pro nick **${player.name}**. Body: **${player.points}** (${player.title}).`, 
                     ephemeral: true 
                 });
 
@@ -242,7 +233,37 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-// --- 6. SPUŠTĚNÍ ---
+// --- 6. AUTOMATICKÁ AKTUALIZACE PŘI ZMĚNĚ ROLÍ ---
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
+    try {
+        // Vyhledáme hráče v databázi podle jeho Discord ID
+        const player = await Player.findOne({ discordId: newMember.id });
+        
+        // Pokud hráč ještě není v databázi (nezaregistroval si nick přes !setup), přeskočíme ho
+        if (!player) return;
+
+        // Načteme nové tiery z jeho aktuálních rolí
+        const updatedTiers = getTiersFromRoles(newMember);
+        const isRestricted = newMember.roles.cache.some(role => role.name.toLowerCase() === 'restricted');
+        const isRetired = newMember.roles.cache.some(role => role.name.toLowerCase() === 'retired');
+
+        // Uložíme nové hodnoty
+        player.tiers = updatedTiers;
+        player.isRestricted = isRestricted;
+        player.isRetired = isRetired;
+        player.points = calculatePoints(player.tiers);
+        player.title = getTitleByPoints(player.points);
+
+        player.markModified('tiers');
+        await player.save();
+
+        console.log(`[Auto-Update] Hráči ${player.name} byly automaticky aktualizovány tiery podle nově přidělených rolí!`);
+    } catch (error) {
+        console.error("Chyba při automatické aktualizaci rolí:", error);
+    }
+});
+
+// --- 7. SPUŠTĚNÍ ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server běží na portu ${PORT}`);

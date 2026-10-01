@@ -37,6 +37,18 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model('Player', playerSchema, 'players');
 
+// Seznam sledovaných kitů na webu
+const KITS = [
+    "neth axe",
+    "explosive diarrhea",
+    "dia mace",
+    "altarsmp",
+    "poorsmp",
+    "netherite berry",
+    "drainpvp",
+    "lt mace"
+];
+
 // --- 3. API ENDPOINT PRO WEB ---
 app.get('/api/players', async (req, res) => {
     try {
@@ -55,10 +67,10 @@ function calculatePoints(tiersObj) {
     let totalPoints = 0;
     const tierValues = {
         "ht1": 60, "lt1": 48,
-        "ht2": 32, "lt2": 24,
-        "ht3": 16, "lt3": 10,
+        "ht2": 32,  "lt2": 24,
+        "ht3": 16,  "lt3": 10,
         "ht4": 5,  "lt4": 3,
-        "ht5": 2,  "lt5": 1
+        "ht5": 2,   "lt5": 1
     };
 
     if (!tiersObj) return 0;
@@ -80,7 +92,6 @@ function getTitleByPoints(points) {
     return "Combat Member";
 }
 
-// Načtení tierů přímo z názvů rolí (formát: "kit-tier", např. "neth axe-lt3")
 function getTiersFromRoles(member) {
     const detectedTiers = {
         "neth axe": "-",
@@ -95,18 +106,43 @@ function getTiersFromRoles(member) {
 
     if (!member || !member.roles) return detectedTiers;
 
+    // Projdeme všechny role uživatele
     member.roles.cache.forEach(role => {
         const roleName = role.name.toLowerCase().trim();
 
+        // Pokud role obsahuje pomlčku (např. "altarsmp-lt3")
         if (roleName.includes('-')) {
             const parts = roleName.split('-');
-            const kitName = parts[0].trim();
-            const tierValue = parts[1].trim();
+            const kitName = parts[0].trim(); // Název kitu před pomlčkou
+            const tierValue = parts[1].trim(); // Tier za pomlčkou
 
+            // Zkontrolujeme, zda tento kit máme v seznamu
             if (detectedTiers.hasOwnProperty(kitName)) {
                 detectedTiers[kitName] = tierValue.toUpperCase();
             }
         }
+    });
+
+    return detectedTiers;
+}
+
+    if (!member || !member.roles) return detectedTiers;
+
+    const validTiers = ["ht1", "lt1", "ht2", "lt2", "ht3", "lt3", "ht4", "lt4", "ht5", "lt5"];
+
+    // Projít všechny role uživatele na Discordu
+    member.roles.cache.forEach(role => {
+        const roleName = role.name.toLowerCase();
+
+        KITS.forEach(kit => {
+            if (roleName.includes(kit)) {
+                // Najdeme, jaký tier (např. ht1, lt2) je v názvu role
+                const foundTier = validTiers.find(t => roleName.includes(t));
+                if (foundTier) {
+                    detectedTiers[kit] = foundTier.toUpperCase();
+                }
+            }
+        });
     });
 
     return detectedTiers;
@@ -138,7 +174,7 @@ client.on('messageCreate', async message => {
         const row = new ActionRowBuilder().addComponents(button);
 
         await message.channel.send({
-            content: 'Kliknutím na tlačítko níže si zaregistruješ svůj Minecraft nick a načtou se ti role z Discordu na web:',
+            content: 'Kliknutím na tlačítko níže si zaregistruješ svúj Minecraft nick a načtou se ti role z Discordu na web:',
             components: [row]
         });
     }
@@ -185,7 +221,7 @@ client.on('interactionCreate', async interaction => {
                 player.region = "EU";
                 player.isRestricted = isRestricted;
                 player.isRetired = isRetired;
-                player.tiers = tiersFromRoles;
+                player.tiers = tiersFromRoles; // Uložíme rovnou tiery načtené z rolí
 
                 player.points = calculatePoints(player.tiers);
                 player.title = getTitleByPoints(player.points);

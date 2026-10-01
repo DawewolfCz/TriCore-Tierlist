@@ -26,6 +26,36 @@
             flex-direction: column;
         }
 
+        .header-bar {
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .admin-login-btn {
+            background-color: #1e2333;
+            border: 1px solid #ff0055;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .admin-login-btn:hover {
+            background-color: #ff0055;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+        }
+
         .main-title {
             text-align: center;
             font-size: 2.8rem;
@@ -48,9 +78,8 @@
             width: 100%;
         }
 
-        .search-input {
+        .search-input, .admin-input, .admin-select {
             width: 100%;
-            max-width: 350px;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             padding: 10px 16px;
@@ -59,13 +88,18 @@
             font-size: 0.9rem;
             outline: none;
             transition: border-color 0.2s ease;
+            box-sizing: border-box;
         }
 
-        .search-input:focus {
+        .search-input {
+            max-width: 350px;
+        }
+
+        .search-input:focus, .admin-input:focus, .admin-select:focus {
             border-color: #ff0055;
         }
 
-        .jump-btn {
+        .jump-btn, .admin-submit-btn {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
@@ -75,6 +109,20 @@
             font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s;
+        }
+
+        .admin-submit-btn {
+            background: #ff0055;
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            font-weight: 700;
+            margin-top: 15px;
+        }
+
+        .admin-submit-btn:hover {
+            background: #e0004c;
         }
 
         .jump-btn:hover {
@@ -276,7 +324,6 @@
         .badge-lt3 { background: #1e3a8a; color: #60a5fa; }
         .badge-ht { background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; }
 
-        /* Kit sloupce grid */
         .tier-columns-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -318,36 +365,14 @@
             cursor: pointer;
         }
 
-        .player-kit-card:hover {
-            border-color: #4b5563;
-        }
-
-        .kit-card-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .kit-card-avatar {
-            width: 22px;
-            height: 22px;
-            border-radius: 3px;
-        }
-
-        .kit-card-name {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .kit-card-arrows {
-            font-size: 0.85rem;
-            font-weight: 800;
-        }
-
+        .player-kit-card:hover { border-color: #4b5563; }
+        .kit-card-left { display: flex; align-items: center; gap: 8px; }
+        .kit-card-avatar { width: 22px; height: 22px; border-radius: 3px; }
+        .kit-card-name { font-size: 0.8rem; font-weight: 600; }
+        .kit-card-arrows { font-size: 0.85rem; font-weight: 800; }
         .ht-card .kit-card-arrows { color: #f43f5e; }
         .lt-card .kit-card-arrows { color: #3b82f6; }
 
-        /* Modaly */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -362,9 +387,7 @@
             backdrop-filter: blur(4px);
         }
 
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
 
         .modal-card {
             background: var(--card-bg);
@@ -376,6 +399,8 @@
             flex-direction: column;
             align-items: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-close {
@@ -391,71 +416,44 @@
 
         .modal-close:hover { color: #fff; }
 
-        .modal-avatar-container img {
-            width: 68px;
-            height: 68px;
-            border-radius: 8px;
-        }
+        .modal-avatar-container img { width: 68px; height: 68px; border-radius: 8px; }
+        .modal-username { font-size: 1.4rem; font-weight: 800; margin: 10px 0 5px 0; }
+        .modal-stats-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .modal-rank-badge { font-weight: 800; color: #ffaa00; }
+        .modal-points-text { font-size: 0.85rem; color: var(--text-muted); }
+        .modal-title-tag { background: #252a3a; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+        .modal-kits-grid { width: 100%; display: flex; justify-content: center; gap: 8px; margin-top: 10px; padding-top: 15px; border-top: 1px solid #1c202e; flex-wrap: wrap; }
 
-        .modal-username {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin: 10px 0 5px 0;
-        }
+        .profile-kit-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .profile-kit-icon { width: 36px; height: 36px; border-radius: 50%; background: #181c28; border: 1px solid #2a3147; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 
-        .modal-stats-bar {
-            display: flex;
-            align-items: center;
+        .admin-kit-edit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .modal-rank-badge {
-            font-weight: 800;
-            color: #ffaa00;
-        }
-
-        .modal-points-text {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .modal-title-tag {
-            background: #252a3a;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .modal-kits-grid {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
             margin-top: 10px;
-            padding-top: 15px;
-            border-top: 1px solid #1c202e;
-            flex-wrap: wrap;
         }
 
-        .profile-kit-item {
+        .admin-kit-row {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 6px;
-        }
-
-        .profile-kit-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            justify-content: space-between;
             background: #181c28;
-            border: 1px solid #2a3147;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #252a3a;
+        }
+
+        .admin-kit-row label {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .admin-kit-row select {
+            width: 90px;
+            padding: 4px;
+            font-size: 0.8rem;
         }
 
         footer {
@@ -466,24 +464,18 @@
             font-size: 0.85rem;
         }
 
-        footer .links {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        footer .links a {
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-
-        footer .links a:hover {
-            color: #fff;
-        }
+        footer .links { margin-top: 10px; display: flex; justify-content: center; gap: 15px; }
+        footer .links a { color: var(--text-muted); text-decoration: none; }
+        footer .links a:hover { color: #fff; }
     </style>
 </head>
 <body>
+
+    <div class="header-bar">
+        <button class="admin-login-btn" id="adminAuthBtn" onclick="handleAdminBtnClick()">
+            🔒 Admin Login
+        </button>
+    </div>
 
     <h1 class="main-title">TriCore Tierlist</h1>
 
@@ -517,6 +509,7 @@
         </div>
     </footer>
 
+    <!-- Modal: Detail Hráče -->
     <div class="modal-overlay" id="playerModal">
         <div class="modal-card">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -535,6 +528,53 @@
         </div>
     </div>
 
+    <!-- Modal: Admin Login -->
+    <div class="modal-overlay" id="adminLoginModal">
+        <div class="modal-card" style="width: 320px;">
+            <button class="modal-close" onclick="closeModalById('adminLoginModal')">&times;</button>
+            <div class="modal-username" style="font-size: 1.2rem; margin-bottom: 15px;">Admin Přihlášení</div>
+            <form id="adminLoginForm" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="adminUser" class="admin-input" placeholder="Uživatelské jméno" required>
+                <input type="password" id="adminPass" class="admin-input" placeholder="Heslo" required>
+                <button type="submit" class="admin-submit-btn">Přihlásit se</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Admin Panel (Úprava Tierů) -->
+    <div class="modal-overlay" id="adminPanelModal">
+        <div class="modal-card" style="width: 480px;">
+            <button class="modal-close" onclick="closeModalById('adminPanelModal')">&times;</button>
+            <div class="modal-username" style="font-size: 1.3rem; margin-bottom: 15px;">Správa Hráče / Tierů</div>
+            
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                <label style="font-size: 0.85rem; color: var(--text-muted);">Vyber hráče k úpravě:</label>
+                <select id="adminPlayerSelect" class="admin-select" onchange="loadPlayerDataToAdminForm()"></select>
+
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Body (Points):</label>
+                        <input type="number" id="adminPointsInput" class="admin-input" value="0">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">Stav:</label>
+                        <select id="adminStatusSelect" class="admin-select">
+                            <option value="active">Aktivní</option>
+                            <option value="restricted">Restricted</option>
+                            <option value="retired">Retired</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">Úprava Kit Tierů:</label>
+                <div class="admin-kit-edit-grid" id="adminKitGrid"></div>
+
+                <button type="button" class="admin-submit-btn" onclick="saveAdminPlayerChanges()">Uložit Změny</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modaly: Privacy & Cookies -->
     <div class="modal-overlay" id="privacyModal">
         <div class="modal-card" style="width: 420px; align-items: flex-start;">
             <button class="modal-close" onclick="closeModalById('privacyModal')">&times;</button>
@@ -573,6 +613,8 @@
             'lt mace'
         ];
 
+        const availableTiers = ['-', 'ht1', 'lt1', 'ht2', 'lt2', 'ht3', 'lt3', 'ht4', 'lt4', 'ht5', 'lt5'];
+
         const kitIcons = {
             'neth axe': '🪓',
             'explosive diarrhea': '💥',
@@ -583,6 +625,9 @@
             'drainpvp': '🛡️',
             'lt mace': '⚡'
         };
+
+        let isAdminLoggedIn = false;
+        let adminToken = null;
 
         function getTierWeight(tierStr) {
             if (!tierStr || tierStr === '-' || tierStr === 'none') return 99;
@@ -867,6 +912,134 @@
             }
 
             container.innerHTML = `<div class="tier-columns-grid">${columnsHtml}</div>`;
+        }
+
+        /* ADMIN SPRÁVA */
+        function handleAdminBtnClick() {
+            if (isAdminLoggedIn) {
+                openAdminPanel();
+            } else {
+                openModalById('adminLoginModal');
+            }
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user, pass })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    adminToken = data.token;
+                    isAdminLoggedIn = true;
+                    document.getElementById('adminAuthBtn').innerHTML = '⚙️ Admin Panel';
+                    closeModalById('adminLoginModal');
+                    openAdminPanel();
+                } else {
+                    alert('Špatné přihlašovací údaje!');
+                }
+            } catch (err) {
+                alert('Chyba při přihlašování.');
+            }
+        });
+
+        function openAdminPanel() {
+            const select = document.getElementById('adminPlayerSelect');
+            select.innerHTML = '';
+            
+            categoriesData.overall.forEach(player => {
+                const opt = document.createElement('option');
+                opt.value = player.name;
+                opt.textContent = player.name;
+                select.appendChild(opt);
+            });
+
+            if (categoriesData.overall.length > 0) {
+                loadPlayerDataToAdminForm();
+            }
+
+            openModalById('adminPanelModal');
+        }
+
+        function loadPlayerDataToAdminForm() {
+            const selectedName = document.getElementById('adminPlayerSelect').value;
+            const player = categoriesData.overall.find(p => p.name === selectedName);
+
+            if (!player) return;
+
+            document.getElementById('adminPointsInput').value = player.points || 0;
+            
+            let status = 'active';
+            if (player.isRestricted) status = 'restricted';
+            else if (player.isRetired) status = 'retired';
+            document.getElementById('adminStatusSelect').value = status;
+
+            const grid = document.getElementById('adminKitGrid');
+            grid.innerHTML = '';
+
+            allKits.forEach(kit => {
+                const currentTier = getPlayerTier(player, kit);
+                let options = availableTiers.map(t => 
+                    `<option value="${t}" ${currentTier.toLowerCase() === t ? 'selected' : ''}>${t.toUpperCase()}</option>`
+                ).join('');
+
+                grid.innerHTML += `
+                    <div class="admin-kit-row">
+                        <label>${kitIcons[kit]} ${kit}</label>
+                        <select id="admin_kit_${kit.replace(/\s+/g, '_')}" class="admin-select">
+                            ${options}
+                        </select>
+                    </div>
+                `;
+            });
+        }
+
+        async function saveAdminPlayerChanges() {
+            const selectedName = document.getElementById('adminPlayerSelect').value;
+            const points = parseInt(document.getElementById('adminPointsInput').value) || 0;
+            const status = document.getElementById('adminStatusSelect').value;
+
+            const updatedTiers = {};
+            allKits.forEach(kit => {
+                const elem = document.getElementById(`admin_kit_${kit.replace(/\s+/g, '_')}`);
+                if (elem) updatedTiers[kit] = elem.value;
+            });
+
+            const payload = {
+                name: selectedName,
+                points: points,
+                status: status,
+                tiers: updatedTiers
+            };
+
+            try {
+                const res = await fetch('/api/admin/update-player', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert('Hráč byl úspěšně aktualizován!');
+                    closeModalById('adminPanelModal');
+                    loadDataFromBot();
+                } else {
+                    alert('Chyba při ukládání dat.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Chyba připojení k serveru.');
+            }
         }
 
         loadDataFromBot();
